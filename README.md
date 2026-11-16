@@ -58,7 +58,7 @@ Créé par Diurn Studio pour le module Intégration & Développement Web (ITECOM
 
 ## La sauvegarde en ligne
 
-Sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans une base Supabase et l'élève la retrouve sur n'importe quel ordinateur. Le même compte sert pour Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
+Sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans Firebase (projet « bip-jeux », plan gratuit) et l'élève la retrouve sur n'importe quel ordinateur. Le même compte sert pour Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
 
 Rappel aux élèves : noter son e-mail et son mot de passe, et se déconnecter en partant d'un ordinateur de l'école.
 

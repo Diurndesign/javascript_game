@@ -1,16 +1,22 @@
 "use strict";
 /* =====================================================================
-   SAUVEGARDE EN LIGNE (Supabase) : un compte e-mail + mot de passe,
+   SAUVEGARDE EN LIGNE (Firebase) : un compte e-mail + mot de passe,
    la progression suit l'élève sur n'importe quel ordinateur.
    Le même compte sert pour Mission Bip et Bip Agence.
    Sans compte, le jeu marche comme avant (sauvegarde dans le navigateur).
    ===================================================================== */
 const BipCloud = (() => {
-  const SB_URL = "https://geznatypeygiovbtandl.supabase.co";
-  const SB_KEY = "sb_publishable_FjmemBQHp10OD-pL0d4LaQ_tIKjp0MP";
-  const START_HASH = location.hash; // lu avant que le jeu ne change l'adresse
+  // clés publiques du projet Firebase « bip-jeux » (faites pour être dans la page)
+  const FB_CONFIG = {
+    apiKey: "AIzaSyDF6idRWnpsezjXYQ_f_7_58O2prxvA9Gc",
+    authDomain: "bip-jeux.firebaseapp.com",
+    projectId: "bip-jeux",
+    storageBucket: "bip-jeux.firebasestorage.app",
+    messagingSenderId: "518939054835",
+    appId: "1:518939054835:web:737987fffa793c14a25d86"
+  };
   const LOCAL_ONLY = ["teacher", "unlockAll", "owner"];
-  let cfg = null, sb = null, user = null, timer = null, busy = false, status = "off", lastPull = 0, ready = false;
+  let cfg = null, auth = null, db = null, user = null, timer = null, busy = false, status = "off", lastPull = 0, ready = false;
 
   /* ---------- petits outils ---------- */
   const $ = s => document.querySelector(s);
@@ -23,16 +29,17 @@ const BipCloud = (() => {
     clearTimeout(note.t); note.t = setTimeout(() => n.classList.remove("show"), 3200);
   }
   function french(err) {
-    const m = String(err && (err.message || err.error_description || err) || "");
-    if (/Invalid login credentials/i.test(m)) return "E-mail ou mot de passe incorrect.";
-    if (/already registered|already been registered|already exists/i.test(m)) return "Un compte existe déjà avec cet e-mail : connecte-toi plutôt.";
-    if (/at least 6|Password should be/i.test(m)) return "Le mot de passe doit faire au moins 6 caractères.";
-    if (/valid email|invalid format|Unable to validate email/i.test(m)) return "Cette adresse e-mail n’est pas valide.";
-    if (/rate limit|too many/i.test(m)) return "Trop d’essais en peu de temps : attends quelques minutes, ou préviens ton formateur.";
-    if (/not confirmed/i.test(m)) return "Ton e-mail n’est pas encore confirmé : clique sur le lien reçu par e-mail, puis reconnecte-toi.";
-    if (/Failed to fetch|NetworkError|network|Load failed/i.test(m)) return "Impossible de joindre le serveur : vérifie ta connexion internet.";
-    if (/same.*password|different from the old/i.test(m)) return "Choisis un mot de passe différent de l’ancien.";
-    return "Erreur : " + m;
+    const code = String(err && err.code || ""), m = String(err && err.message || err || "");
+    if (/invalid-credential|wrong-password|user-not-found|invalid-login/.test(code)) return "E-mail ou mot de passe incorrect.";
+    if (/email-already-in-use/.test(code)) return "Un compte existe déjà avec cet e-mail : connecte-toi plutôt.";
+    if (/weak-password/.test(code)) return "Le mot de passe doit faire au moins 6 caractères.";
+    if (/invalid-email|missing-email/.test(code)) return "Cette adresse e-mail n’est pas valide.";
+    if (/too-many-requests|quota/.test(code)) return "Trop d’essais en peu de temps : attends quelques minutes, ou préviens ton formateur.";
+    if (/network-request-failed|unavailable/.test(code) || /Failed to fetch|NetworkError|offline/i.test(m)) return "Impossible de joindre le serveur : vérifie ta connexion internet.";
+    if (/permission-denied/.test(code)) return "La base refuse l’accès : préviens ton formateur (règles de sécurité Firestore).";
+    if (/operation-not-allowed/.test(code)) return "La connexion par e-mail n’est pas activée : préviens ton formateur.";
+    if (/unauthorized-domain/.test(code)) return "Ce site n’est pas autorisé à se connecter : préviens ton formateur.";
+    return "Erreur : " + (code || m);
   }
 
   /* ---------- état affiché dans la barre ---------- */
@@ -60,11 +67,12 @@ const BipCloud = (() => {
   }
 
   /* ---------- lecture / écriture en ligne ---------- */
+  const ref = () => db.collection("eleves").doc(user.uid).collection("jeux").doc(cfg.game);
   async function pull() {
-    const { data, error } = await sb.from("progress").select("data").eq("game", cfg.game).maybeSingle();
-    if (error) throw error;
+    const d = await ref().get();
     lastPull = Date.now();
-    return data ? data.data : null;
+    if (!d.exists) return null;
+    try { return JSON.parse(d.data().data); } catch (e) { return null; }
   }
   async function push() {
     if (!user) return;
@@ -72,11 +80,11 @@ const BipCloud = (() => {
     if (busy) { timer = setTimeout(push, 800); return; }
     busy = true; setStatus("saving");
     try {
-      const { error } = await sb.from("progress").upsert({ user_id: user.id, game: cfg.game, data: clean(cfg.getStore()) }, { onConflict: "user_id,game" });
-      if (error) throw error;
+      await ref().set({ data: JSON.stringify(clean(cfg.getStore())), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       setStatus("saved");
     } catch (e) {
       setStatus("error");
+      if (/permission-denied/.test(String(e && e.code))) note(french(e));
       timer = setTimeout(push, 15000); // on réessaie plus tard
     } finally { busy = false; }
   }
@@ -90,10 +98,10 @@ const BipCloud = (() => {
     const cur = cfg.getStore();
     const local = clean(cur);
     let next;
-    if (cur.owner && cur.owner !== u.id) next = Object.assign(cfg.empty(), remote || {});        // progression d'un autre élève sur ce PC : on ne mélange pas
+    if (cur.owner && cur.owner !== u.uid) next = Object.assign(cfg.empty(), remote || {});        // progression d'un autre élève sur ce PC : on ne mélange pas
     else next = remote ? merge(local, Object.assign(cfg.empty(), remote)) : local;                 // ce que tu as fait sans compte rejoint ton compte
     for (const k of ["teacher", "unlockAll"]) if (k in cur) next[k] = cur[k];
-    next.owner = u.id;
+    next.owner = u.uid;
     cfg.setStore(next);
     ready = true;
     cfg.persist();
@@ -103,8 +111,8 @@ const BipCloud = (() => {
   }
   async function logout() {
     if (timer || status !== "saved") await push();
-    await sb.auth.signOut();
     user = null; ready = false;
+    await auth.signOut();
     const cur = cfg.getStore(); const next = cfg.empty();
     for (const k of ["teacher", "unlockAll"]) if (k in cur) next[k] = cur[k];
     cfg.setStore(next); cfg.persist(); cfg.refresh();
@@ -144,12 +152,9 @@ const BipCloud = (() => {
       if (p1.length < 6) { err.textContent = "Le mot de passe doit faire au moins 6 caractères."; return; }
       if (p1 !== p2) { err.textContent = "Les deux mots de passe ne sont pas pareils."; return; }
       err.textContent = "Création du compte…";
-      const { data, error } = await sb.auth.signUp({ email, password: p1, options: { emailRedirectTo: location.origin + location.pathname } });
-      if (error) { err.textContent = french(error); return; }
-      if (data.session) { close(); await adopt(data.session.user); return; }
-      open(`${head("Vérifie ta boîte mail", "Un e-mail de confirmation vient d’être envoyé à <b>" + esc(email) + "</b>. Clique sur le lien qu’il contient : tu reviendras ici, connecté.")}
-        ${REMINDER}<div class="dialog-actions"><button class="btn btn-primary" type="button" id="cloud-ok">Compris</button></div>`, "#cloud-ok");
-      $("#cloud-ok").addEventListener("click", close);
+      let cred;
+      try { cred = await auth.createUserWithEmailAndPassword(email, p1); } catch (e) { err.textContent = french(e); return; }
+      close(); await adopt(cred.user);
     });
   }
   function showLogin(prefill = "") {
@@ -169,9 +174,9 @@ const BipCloud = (() => {
       const email = $("#cloud-email").value.trim(), pass = $("#cloud-pass").value, err = $("#cloud-err");
       if (!email || !pass) { err.textContent = "Écris ton e-mail et ton mot de passe."; return; }
       err.textContent = "Connexion…";
-      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-      if (error) { err.textContent = french(error); return; }
-      close(); await adopt(data.user);
+      let cred;
+      try { cred = await auth.signInWithEmailAndPassword(email, pass); } catch (e) { err.textContent = french(e); return; }
+      close(); await adopt(cred.user);
     });
   }
   function showForgot(prefill = "") {
@@ -187,30 +192,10 @@ const BipCloud = (() => {
       const email = $("#cloud-email").value.trim(), err = $("#cloud-err");
       if (!email) { err.textContent = "Écris ton e-mail."; return; }
       err.textContent = "Envoi…";
-      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
-      if (error) { err.textContent = french(error); return; }
-      open(`${head("E-mail envoyé", "Si un compte existe avec <b>" + esc(email) + "</b>, tu vas recevoir un lien. Ouvre-le : tu pourras choisir un nouveau mot de passe. Pense à regarder dans les spams.")}
+      try { await auth.sendPasswordResetEmail(email); } catch (e) { if (!/user-not-found/.test(String(e && e.code))) { err.textContent = french(e); return; } }
+      open(`${head("E-mail envoyé", "Si un compte existe avec <b>" + esc(email) + "</b>, tu vas recevoir un lien. Ouvre-le pour choisir un nouveau mot de passe, puis reviens te connecter ici. Pense à regarder dans les spams.")}
         <div class="dialog-actions"><button class="btn btn-primary" type="button" id="cloud-ok">Compris</button></div>`, "#cloud-ok");
       $("#cloud-ok").addEventListener("click", close);
-    });
-  }
-  function showNewPassword() {
-    open(`${head("Nouveau mot de passe", "Choisis ton nouveau mot de passe.")}
-      <form id="cloud-form" class="cloud-form" novalidate>
-        ${field("cloud-pass", "Nouveau mot de passe (6 caractères minimum)", "password", `autocomplete="new-password" required`)}
-        ${field("cloud-pass2", "Retape-le", "password", `autocomplete="new-password" required`)}
-        ${REMINDER}
-        <p class="cloud-err" id="cloud-err" role="alert"></p>
-        <div class="dialog-actions"><button class="btn btn-primary" type="submit">Enregistrer</button></div>
-      </form>`, "#cloud-pass");
-    $("#cloud-form").addEventListener("submit", async ev => {
-      ev.preventDefault();
-      const p1 = $("#cloud-pass").value, p2 = $("#cloud-pass2").value, err = $("#cloud-err");
-      if (p1.length < 6) { err.textContent = "Le mot de passe doit faire au moins 6 caractères."; return; }
-      if (p1 !== p2) { err.textContent = "Les deux mots de passe ne sont pas pareils."; return; }
-      const { error } = await sb.auth.updateUser({ password: p1 });
-      if (error) { err.textContent = french(error); return; }
-      close(); note("Mot de passe changé.");
     });
   }
   function showAccount() {
@@ -227,7 +212,7 @@ const BipCloud = (() => {
 
   /* ---------- bandeau sur l'accueil ---------- */
   function bannerHTML() {
-    if (!sb) return "";
+    if (!auth) return "";
     if (user) return "";
     return `<section class="cloud-banner"><div><p class="kicker">Sauvegarde en ligne</p><h2>Crée ton compte pour ne rien perdre</h2><p>Sans compte, ta progression reste dans ce navigateur : sur un autre ordinateur, tu repars de zéro. Avec ton <b>e-mail</b> et un <b>mot de passe</b>, tu la retrouves partout.</p><p class="cloud-banner-one">Déjà un compte sur ${other()} ? C’est le même : clique sur « J’ai déjà un compte ».</p></div>
       <div class="cloud-banner-actions"><button class="btn btn-primary" type="button" data-cloud="signup">Créer mon compte</button><button class="btn" type="button" data-cloud="login">J’ai déjà un compte</button></div></section>`;
@@ -241,29 +226,23 @@ const BipCloud = (() => {
     setStatus("off");
     document.addEventListener("click", e => {
       const t = e.target.closest("#nav-account, [data-cloud]"); if (!t) return;
-      if (!sb) { note("La sauvegarde en ligne ne marche pas ici : ouvre le jeu depuis son adresse GitHub."); return; }
+      if (!auth) { note("La sauvegarde en ligne ne marche pas ici : ouvre le jeu depuis son adresse GitHub."); return; }
       const what = t.id === "nav-account" ? (user ? "account" : "login") : t.dataset.cloud;
       ({ account: showAccount, login: showLogin, signup: showSignup })[what]();
     });
-    if (!window.supabase || !window.supabase.createClient) { cfg.refresh(); return; } // bibliothèque absente : on reste en local
-    sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: "bip-jeux-auth" } });
-    // retour d'un lien reçu par e-mail (confirmation ou mot de passe oublié)
-    const params = new URLSearchParams(START_HASH.replace(/^#/, ""));
-    let recovery = false;
-    if (params.get("access_token") && params.get("refresh_token")) {
-      const { error } = await sb.auth.setSession({ access_token: params.get("access_token"), refresh_token: params.get("refresh_token") });
-      if (error) note(french(error)); else recovery = params.get("type") === "recovery";
-    } else if (params.get("error_description")) note("Le lien a expiré ou a déjà servi : redemande-en un.");
-    let session = null;
-    try { session = (await sb.auth.getSession()).data.session; } catch (e) { /* hors ligne */ }
-    if (session && session.user) await adopt(session.user, { silent: true });
+    if (!window.firebase || !firebase.initializeApp) { cfg.refresh(); return; } // bibliothèque absente : on reste en local
+    try {
+      const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(FB_CONFIG);
+      auth = app.auth(); db = app.firestore(); auth.languageCode = "fr";
+    } catch (e) { auth = null; cfg.refresh(); return; }
+    const first = await new Promise(res => { const off = auth.onAuthStateChanged(u => { off(); res(u); }, () => res(null)); });
+    if (first) await adopt(first, { silent: true });
     else {
       const cur = cfg.getStore();
       if (cur.owner) { const next = cfg.empty(); for (const k of ["teacher", "unlockAll"]) if (k in cur) next[k] = cur[k]; cfg.setStore(next); cfg.persist(); } // déconnecté ailleurs
       cfg.refresh(); setStatus("off");
     }
-    if (recovery) showNewPassword();
-    sb.auth.onAuthStateChange((ev, s) => { if (ev === "SIGNED_OUT" && user) { user = null; ready = false; setStatus("off"); cfg.refresh(); } });
+    auth.onAuthStateChanged(u => { if (!u && user) { user = null; ready = false; setStatus("off"); cfg.refresh(); } });
     document.addEventListener("visibilitychange", async () => {
       if (!user) return;
       if (document.visibilityState === "hidden") { if (timer) push(); return; }
