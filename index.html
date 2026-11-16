@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mission Bip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/acorn@8.11.3/dist/acorn.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <button class="brand" id="brand" type="button" aria-label="Retour à la carte"><span id="brand-bip"></span>Mission Bip</button>
+  <nav class="nav" aria-label="Navigation">
+    <button type="button" id="nav-map">Carte</button>
+    <button type="button" id="nav-notebook">Carnet</button>
+    <button type="button" id="nav-sandbox">Bac à sable</button>
+  </nav>
+  <div class="stats" aria-live="polite"><span><span class="star">★</span> <span id="stat-stars">0</span><span class="label"> / <span id="stat-max">0</span></span></span><span class="label"><span id="stat-done">0</span><span class="label"> / <span id="stat-total">0</span> missions</span></span></div>
+</header>
+
+<main>
+  <section id="view-map"></section>
+  <section id="view-level" hidden></section>
+  <section id="view-notebook" hidden></section>
+</main>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="dialog" id="dialog"></div></div>
+<canvas id="confetti" hidden></canvas>
+<noscript><p style="padding:24px">Ce jeu a besoin de JavaScript pour fonctionner.</p></noscript>
+
+<script src="script.js"></script>
+</body>
+</html>
