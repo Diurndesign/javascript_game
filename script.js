@@ -276,7 +276,7 @@ const LEVELS = [
   ],
   hints: ["Un objet : `const robot = { nom: \"Bip\", niveau: 1, enMarche: true };`", "Pour lire : `robot.nom`.", "Pour augmenter : `robot.niveau = robot.niveau + 1;`"],
   solution: `const robot = {\n  nom: "Bip",\n  niveau: 1,\n  enMarche: true\n};\n\nconsole.log(robot.nom);\nrobot.niveau = robot.niveau + 1;`,
-  debrief: "Un objet, c’est une fiche. Les projets du site Valmont sont exactement ça : `{ title, place, year, category, image }`. Et une liste de fiches, c’est la mission suivante."
+  debrief: "Un objet, c’est une fiche. Les projets d’un portfolio sont exactement ça : `{ title, place, year, category, image }`. Et une liste de fiches, c’est la mission suivante."
 },
 {
   id: "catalogue", ch: 3, title: "Le catalogue", notion: "tableau d’objets",
@@ -372,8 +372,8 @@ const LEVELS = [
 {
   id: "motdepasse", ch: 5, title: "La porte à code", notion: "else if",
   bip: "La porte de l’atelier demande un mot de passe. Trois cas possibles : le bon, un champ vide, ou un mauvais.",
-  prelude: `const motDePasse = "valmont";`,
-  scenarios: [{ prelude: `const motDePasse = "valmont";` }, { prelude: `const motDePasse = "";`, hidden: true }, { prelude: `const motDePasse = "abc";`, hidden: true }],
+  prelude: `const motDePasse = "bip2049";`,
+  scenarios: [{ prelude: `const motDePasse = "bip2049";` }, { prelude: `const motDePasse = "";`, hidden: true }, { prelude: `const motDePasse = "abc";`, hidden: true }],
   lesson: {
     what: "Quand il y a plus de deux cas, on enchaîne avec `else if`. JavaScript teste les conditions **dans l’ordre** et exécute seulement le premier bloc dont la condition est vraie.",
     code: `if (note >= 16) {\n  console.log("Très bien");\n} else if (note >= 10) {\n  console.log("Validé");\n} else {\n  console.log("À retravailler");\n}`,
@@ -381,16 +381,16 @@ const LEVELS = [
     example: { code: `const heure = 14;\nif (heure < 12) {\n  console.log("Bonjour");\n} else if (heure < 18) {\n  console.log("Bon après-midi");\n} else {\n  console.log("Bonsoir");\n}`, out: "Bon après-midi" },
     trap: "L’ordre compte : si tu testes `note >= 10` avant `note >= 16`, un 18 affichera « Validé ». Mets toujours le cas le plus précis en premier."
   },
-  steps: ["Si `motDePasse` est égal à `\"valmont\"`, affiche `Accès autorisé`.", "Sinon, si `motDePasse` est vide (`\"\"`), affiche `Tape un mot de passe`.", "Sinon, affiche `Mot de passe incorrect`."],
+  steps: ["Si `motDePasse` est égal à `\"bip2049\"`, affiche `Accès autorisé`.", "Sinon, si `motDePasse` est vide (`\"\"`), affiche `Tape un mot de passe`.", "Sinon, affiche `Mot de passe incorrect`."],
   starter: ``,
   goals: [
-    { label: "Avec \"valmont\" : `Accès autorisé`", test: branchGoal(0, "Accès autorisé", ["Accès autorisé", "Tape un mot de passe", "Mot de passe incorrect"]) },
+    { label: "Avec \"bip2049\" : `Accès autorisé`", test: branchGoal(0, "Accès autorisé", ["Accès autorisé", "Tape un mot de passe", "Mot de passe incorrect"]) },
     { label: "Avec un champ vide : `Tape un mot de passe` (test caché)", test: branchGoal(1, "Tape un mot de passe", ["Accès autorisé", "Tape un mot de passe", "Mot de passe incorrect"]) },
     { label: "Avec \"abc\" : `Mot de passe incorrect` (test caché)", test: branchGoal(2, "Mot de passe incorrect", ["Accès autorisé", "Tape un mot de passe", "Mot de passe incorrect"]) }
   ],
-  hints: ["Trois blocs : `if (...) { } else if (...) { } else { }`", "Première condition : `motDePasse === \"valmont\"`. Deuxième : `motDePasse === \"\"`.", "Chaque bloc contient un seul `console.log` avec le message exact."],
-  solution: `if (motDePasse === "valmont") {\n  console.log("Accès autorisé");\n} else if (motDePasse === "") {\n  console.log("Tape un mot de passe");\n} else {\n  console.log("Mot de passe incorrect");\n}`,
-  debrief: "C’est la logique de la connexion du site Valmont. Ici elle est simulée : un vrai mot de passe ne s’écrit jamais dans le JS d’une page, car n’importe qui peut lire ce code avec F12."
+  hints: ["Trois blocs : `if (...) { } else if (...) { } else { }`", "Première condition : `motDePasse === \"bip2049\"`. Deuxième : `motDePasse === \"\"`.", "Chaque bloc contient un seul `console.log` avec le message exact."],
+  solution: `if (motDePasse === "bip2049") {\n  console.log("Accès autorisé");\n} else if (motDePasse === "") {\n  console.log("Tape un mot de passe");\n} else {\n  console.log("Mot de passe incorrect");\n}`,
+  debrief: "C’est la logique de la connexion à un espace réservé. Ici elle est simulée : un vrai mot de passe ne s’écrit jamais dans le JS d’une page, car n’importe qui peut lire ce code avec F12."
 },
 {
   id: "quiz2", ch: 5, quiz: true, title: "Contrôle technique n°2", notion: "quiz",
@@ -426,7 +426,7 @@ const LEVELS = [
   ],
   hints: ["Le squelette : `pieces.forEach((piece) => { ... });`", "Dans la boucle : `console.log(\"Vérifié : \" + piece);`", "Attention à l’espace après les deux-points, dans les guillemets."],
   solution: `pieces.forEach((piece) => {\n  console.log("Vérifié : " + piece);\n});`,
-  debrief: "Le jeu a testé ta boucle avec une liste de 2 pièces : ton code s’est adapté tout seul. C’est le principe de la galerie Valmont : un `forEach` sur les projets, une carte par projet."
+  debrief: "Le jeu a testé ta boucle avec une liste de 2 pièces : ton code s’est adapté tout seul. C’est le principe de toutes les galeries : un `forEach` sur les projets, une carte par projet."
 },
 {
   id: "filter", ch: 6, title: "Le grand tri", notion: "filter",
@@ -450,7 +450,7 @@ const LEVELS = [
   ],
   hints: ["Modèle : `const resultat = tableau.filter((element) => condition);`", "`const moteurs = catalogue.filter((piece) => piece.categorie === \"moteur\");`", "Pour pasCher, la condition devient `piece.prix < 10`."],
   solution: `const moteurs = catalogue.filter((piece) => piece.categorie === "moteur");\nconst pasCher = catalogue.filter((piece) => piece.prix < 10);\n\nconsole.log(moteurs.length);`,
-  debrief: "Tu viens d’écrire le cœur du filtre Valmont. Sur le site, le clic sur « Maisons » fait exactement ça, puis redessine la galerie avec le résultat."
+  debrief: "Tu viens d’écrire le cœur d’un filtre. Sur un site, le clic sur « Maisons » fait exactement ça, puis redessine la galerie avec le résultat."
 },
 /* ------------------------------ ATELIER 7 ------------------------------ */
 {
@@ -477,7 +477,7 @@ const LEVELS = [
 },
 {
   id: "creer", ch: 7, title: "Fabriquer des éléments", notion: "createElement",
-  bip: "Affiche ma liste de pièces sur la page, une ligne par pièce. Comme la galerie de Valmont, mais en petit.",
+  bip: "Affiche ma liste de pièces sur la page, une ligne par pièce. Comme la galerie d’un vrai site, mais en petit.",
   prelude: `const pieces = ["roue", "antenne", "ressort", "caméra", "batterie"];`,
   scenarios: [{ prelude: `const pieces = ["roue", "antenne", "ressort", "caméra", "batterie"];` }, { prelude: `const pieces = ["vis", "radar", "micro"];`, hidden: true }],
   stage: `<h2>Mes pièces</h2>\n<ul class="liste"></ul>\n<p class="compteur">0 pièce</p>`,
@@ -497,7 +497,7 @@ const LEVELS = [
   ],
   hints: ["Le squelette : `pieces.forEach((piece) => { ... });`", "Dans la boucle : `const li = document.createElement(\"li\");` puis `li.textContent = piece;` puis `liste.appendChild(li);`", "Après la boucle : `compteur.textContent = pieces.length + \" pièces\";`"],
   solution: `const liste = document.querySelector(".liste");\nconst compteur = document.querySelector(".compteur");\n\npieces.forEach((piece) => {\n  const li = document.createElement("li");\n  li.textContent = piece;\n  liste.appendChild(li);\n});\n\ncompteur.textContent = pieces.length + " pièces";`,
-  debrief: "C’est l’étape 2 de Valmont en miniature : un tableau de données, un `forEach`, un `createElement` par élément. Change les données, la page suit."
+  debrief: "C’est une galerie de site en miniature : un tableau de données, un `forEach`, un `createElement` par élément. Change les données, la page suit."
 },
 {
   id: "clic", ch: 7, title: "Le bouton", notion: "addEventListener",
@@ -524,7 +524,7 @@ const LEVELS = [
 },
 {
   id: "boss", ch: 7, boss: true, title: "La galerie de Bip", notion: "tout ensemble",
-  bip: "Dernière mission. Construis ma galerie avec des boutons de filtre. Si tu y arrives, tu sais faire le cœur du projet Valmont !",
+  bip: "Dernière mission. Construis ma galerie avec des boutons de filtre. Si tu y arrives, tu sais faire le cœur d’une vraie galerie de site !",
   prelude: CAT_BOSS,
   stage: `<div class="filtres">\n  <button class="btn-tout">Tout</button>\n  <button class="btn-moteur">Moteur</button>\n  <button class="btn-capteur">Capteur</button>\n</div>\n<div class="galerie"></div>`,
   lesson: {
@@ -544,7 +544,7 @@ const LEVELS = [
   ],
   hints: ["Dans `afficher` : `liste.forEach((piece) => { const carte = document.createElement(\"div\"); ... });`", "Dans la boucle : `carte.classList.add(\"carte\");` `carte.textContent = piece.nom;` `galerie.appendChild(carte);` Puis, après la fonction : `afficher(catalogue);`", "Un bouton : `btnMoteur.addEventListener(\"click\", () => { afficher(catalogue.filter((p) => p.categorie === \"moteur\")); });`"],
   solution: `const galerie = document.querySelector(".galerie");\nconst btnTout = document.querySelector(".btn-tout");\nconst btnMoteur = document.querySelector(".btn-moteur");\nconst btnCapteur = document.querySelector(".btn-capteur");\n\n// 1. La fonction qui dessine une liste de pièces\nfunction afficher(liste) {\n  galerie.innerHTML = "";\n  liste.forEach((piece) => {\n    const carte = document.createElement("div");\n    carte.classList.add("carte");\n    carte.textContent = piece.nom;\n    galerie.appendChild(carte);\n  });\n}\n\n// 2. Tout afficher au départ\nafficher(catalogue);\n\n// 3. Les boutons\nbtnTout.addEventListener("click", () => {\n  afficher(catalogue);\n});\n\nbtnMoteur.addEventListener("click", () => {\n  const moteurs = catalogue.filter((p) => p.categorie === "moteur");\n  afficher(moteurs);\n});\n\nbtnCapteur.addEventListener("click", () => {\n  const capteurs = catalogue.filter((p) => p.categorie === "capteur");\n  afficher(capteurs);\n});`,
-  debrief: "Données, fonction, boucle, filtre, DOM et événements : tout fonctionne ensemble. C’est l’architecture de la galerie Valmont, et celle de n’importe quel CMS : une collection, un template, des filtres."
+  debrief: "Données, fonction, boucle, filtre, DOM et événements : tout fonctionne ensemble. C’est l’architecture d’une galerie de portfolio, et celle de n’importe quel CMS : une collection, un template, des filtres."
 }
 ];
 
@@ -1192,7 +1192,7 @@ function showSuite() {
         <li><b>47 missions</b> pour de vrais types de clients : site vitrine, appli, boutique, formulaire…</li>
         <li>Le <b>pourquoi</b> de chaque notion : où on la voit sur un site, et à quoi elle sert.</li>
         <li>Des <b>schémas</b>, et deux formations sur ce qui bloque souvent : le chemin pour retrouver, modifier ou supprimer une donnée, et les accolades.</li>
-        <li>À la fin, tu es prêt pour coder le JavaScript du <b>site Valmont</b>.</li>
+        <li>En bonus, quand tout est fini : un <b>projet pour ton portfolio</b>, où tu codes tout le JavaScript d’un site, d’une appli ou d’une boutique.</li>
       </ul></div>
     <p style="color:var(--ink-soft);font-size:.92rem">Les premières missions reprennent ce que tu viens de voir, sous un autre angle : c’est voulu, c’est comme ça qu’on ancre les bases.</p>
     <div class="dialog-actions">
