@@ -66,3 +66,7 @@ Rappel aux élèves : noter son e-mail et son mot de passe, et se déconnecter e
 
 Une fois les 7 ateliers terminés, une fenêtre propose de continuer dans **Bip Agence** ([javascript_avance](https://github.com/Diurndesign/javascript_avance)) : 52 missions pour de vrais types de clients, le pourquoi de chaque notion, et un projet bonus pour le portfolio une fois tout terminé.
 Le lien pointe vers la version en ligne : https://diurndesign.github.io/javascript_avance/ (GitHub Pages doit être activé sur le dépôt javascript_avance).
+
+## L'espace formateur
+
+Page : `admin.html` (https://diurndesign.github.io/javascript_game/admin.html, identique à celle de Bip Agence). Le formateur s'y connecte avec son compte et voit la progression de chaque élève dans **les deux jeux** : missions faites, étoiles, mission en cours, élèves bloqués, essais, erreurs, indices, solutions vues, temps passé et code tapé.
