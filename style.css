@@ -359,3 +359,6 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; justif
 .cloud-banner p { margin: 0; }
 .cloud-banner-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 @media (max-width: 700px) { .cloud-banner { grid-template-columns: 1fr; } }
+.cloud-one { background: #E3F5EC; border: 2px solid var(--ink); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+.cloud-one b { display: block; margin-bottom: 2px; }
+.cloud-banner .cloud-banner-one { margin-top: 8px; font-weight: 700; font-size: .92rem; }

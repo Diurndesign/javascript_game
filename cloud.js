@@ -120,11 +120,14 @@ const BipCloud = (() => {
   }
   const close = () => { $("#modal").hidden = true; };
   const REMINDER = `<p class="cloud-remind"><b>Important</b> Note ton e-mail et ton mot de passe quelque part (carnet, téléphone). Ce sont eux qui te permettent de retrouver ta progression sur un autre ordinateur.</p>`;
+  const other = () => cfg.game === "bip-agence" ? "Mission Bip" : "Bip Agence";
+  const ONE = () => `<p class="cloud-one"><b>Un seul compte pour les deux jeux</b> Mission Bip et Bip Agence utilisent le même compte. Si tu en as déjà créé un dans ${other()}, ne recrée rien : connecte-toi avec le même e-mail et le même mot de passe.</p>`;
   const head = (t, sub) => `<p class="card-kicker">Ma sauvegarde en ligne</p><h2 id="modal-title">${t}</h2>${sub ? `<p>${sub}</p>` : ""}`;
   const field = (id, label, type, extra = "") => `<label class="cloud-field" for="${id}"><span>${label}</span><input id="${id}" type="${type}" ${extra}></label>`;
 
   function showSignup(prefill = "") {
-    open(`${head("Crée ton compte", "Avec un compte, ta progression est sauvegardée en ligne : tu continues sur n’importe quel ordinateur. Le même compte marche pour Mission Bip et Bip Agence.")}
+    open(`${head("Crée ton compte", "Avec un compte, ta progression est sauvegardée en ligne : tu continues sur n’importe quel ordinateur.")}
+      ${ONE()}
       <form id="cloud-form" class="cloud-form" novalidate>
         ${field("cloud-email", "Ton e-mail", "email", `autocomplete="email" value="${esc(prefill)}" required`)}
         ${field("cloud-pass", "Choisis un mot de passe (6 caractères minimum)", "password", `autocomplete="new-password" minlength="6" required`)}
@@ -150,7 +153,7 @@ const BipCloud = (() => {
     });
   }
   function showLogin(prefill = "") {
-    open(`${head("Me connecter", "Retrouve ta progression avec l’e-mail et le mot de passe de ton compte.")}
+    open(`${head("Me connecter", "Retrouve ta progression avec l’e-mail et le mot de passe de ton compte. C’est le même compte pour Mission Bip et Bip Agence.")}
       <form id="cloud-form" class="cloud-form" novalidate>
         ${field("cloud-email", "Ton e-mail", "email", `autocomplete="email" value="${esc(prefill)}" required`)}
         ${field("cloud-pass", "Ton mot de passe", "password", `autocomplete="current-password" required`)}
@@ -213,7 +216,7 @@ const BipCloud = (() => {
   function showAccount() {
     const when = status === "saved" ? "Ta progression est à jour en ligne." : status === "error" ? "Pas de connexion pour l’instant : on réessaie tout seul." : "Sauvegarde en cours…";
     open(`${head("Mon compte")}
-      <p>Connecté avec <b>${esc(user.email)}</b>.</p>
+      <p>Connecté avec <b>${esc(user.email)}</b>. Ce compte marche aussi dans ${other()} : tu y es déjà connecté sur ce navigateur.</p>
       <p class="cloud-state"><span class="cloud-dot ${status}" aria-hidden="true"></span>${when}</p>
       <p class="cloud-remind"><b>Ordinateur de l’école ?</b> Déconnecte-toi en partant : ta progression reste en ligne, et personne d’autre ne pourra jouer avec ton compte.</p>
       <div class="dialog-actions"><button class="btn btn-ghost" type="button" id="cloud-out">Me déconnecter</button><button class="btn" type="button" id="cloud-now">Sauvegarder maintenant</button><button class="btn btn-primary" type="button" id="cloud-close">Continuer</button></div>`, "#cloud-close");
@@ -226,7 +229,7 @@ const BipCloud = (() => {
   function bannerHTML() {
     if (!sb) return "";
     if (user) return "";
-    return `<section class="cloud-banner"><div><p class="kicker">Sauvegarde en ligne</p><h2>Crée ton compte pour ne rien perdre</h2><p>Sans compte, ta progression reste dans ce navigateur : sur un autre ordinateur, tu repars de zéro. Avec ton <b>e-mail</b> et un <b>mot de passe</b>, tu la retrouves partout.</p></div>
+    return `<section class="cloud-banner"><div><p class="kicker">Sauvegarde en ligne</p><h2>Crée ton compte pour ne rien perdre</h2><p>Sans compte, ta progression reste dans ce navigateur : sur un autre ordinateur, tu repars de zéro. Avec ton <b>e-mail</b> et un <b>mot de passe</b>, tu la retrouves partout.</p><p class="cloud-banner-one">Déjà un compte sur ${other()} ? C’est le même : clique sur « J’ai déjà un compte ».</p></div>
       <div class="cloud-banner-actions"><button class="btn btn-primary" type="button" data-cloud="signup">Créer mon compte</button><button class="btn" type="button" data-cloud="login">J’ai déjà un compte</button></div></section>`;
   }
 
