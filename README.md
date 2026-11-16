@@ -56,6 +56,12 @@ La bibliothèque [acorn](https://github.com/acornjs/acorn) est chargée depuis j
 
 Créé par Diurn Studio pour le module Intégration & Développement Web (ITECOM Art Design, Nice).
 
+## La sauvegarde en ligne
+
+Sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans une base Supabase et l'élève la retrouve sur n'importe quel ordinateur. Le même compte sert pour Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
+
+Rappel aux élèves : noter son e-mail et son mot de passe, et se déconnecter en partant d'un ordinateur de l'école.
+
 ## La suite : Bip Agence
 
 Une fois les 7 ateliers terminés, une fenêtre propose de continuer dans **Bip Agence** ([javascript_avance](https://github.com/Diurndesign/javascript_avance)) : 47 missions pour de vrais types de clients, le pourquoi de chaque notion, et un projet bonus pour le portfolio une fois tout terminé.

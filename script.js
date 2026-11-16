@@ -561,7 +561,7 @@ const SANDBOX = {
 const KEY = "mission-bip-v1";
 let store = { progress: {}, drafts: {}, unlockAll: false };
 try { const raw = localStorage.getItem(KEY); if (raw) store = Object.assign(store, JSON.parse(raw)); } catch (e) { /* pas de stockage : on joue sans sauvegarde */ }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* rien */ } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* rien */ } if (window.BipCloud) BipCloud.queue(); }
 
 let current = null;
 let session = null;
@@ -841,6 +841,7 @@ function showMap() {
       <ul class="parts">${CHAPTERS.map(c => `<li class="${done.has(c.n) ? "got" : ""}">${done.has(c.n) ? "✓ " : ""}${esc(c.piece)}</li>`).join("")}</ul>
     </div>
   </section>
+  ${window.BipCloud ? BipCloud.bannerHTML() : ""}
   ${allDone ? `<section class="suite-block">
     <div><p class="kicker">La suite</p><h2>Bip Agence : on pousse le JavaScript plus loin</h2><p>Tu as terminé les 7 ateliers. Bip t’emmène en stage dans une agence web : 47 missions pour de vrais types de clients, le pourquoi de chaque notion, des schémas, et un projet bonus pour ton portfolio.</p></div>
     <div><a class="btn btn-primary" href="${SUITE_URL}" target="_blank" rel="noopener">Continuer dans Bip Agence →</a></div>
@@ -1313,4 +1314,14 @@ const start = data => {
   if (LEVELS.every(l => isDone(l.id)) && !store.suiteShown) { store.suiteShown = true; save(); showSuite(); }
 };
 window.claude && window.claude.hot && window.claude.hot.ready ? window.claude.hot.ready(start) : start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+
+/* sauvegarde en ligne (cloud.js) */
+if (window.BipCloud) BipCloud.init({
+  game: "mission-bip",
+  getStore: () => store,
+  setStore: s => { store = s; },
+  empty: () => ({ progress: {}, drafts: {}, unlockAll: false }),
+  persist: () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* rien */ } },
+  refresh: () => { updateStats(); if (!current) route(); }
+});
 
