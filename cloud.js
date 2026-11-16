@@ -63,6 +63,21 @@ const BipCloud = (() => {
     out.drafts = Object.assign({}, remote.drafts, local.drafts);
     if ("projet" in local || "projet" in remote) out.projet = projScore(local.projet) >= projScore(remote.projet) ? local.projet : remote.projet;
     if (local.suiteShown || remote.suiteShown) out.suiteShown = true;
+    if (local.track || remote.track) {
+      const a = (local.track && local.track.levels) || {}, b = (remote.track && remote.track.levels) || {}, lv = {};
+      for (const id of new Set([...Object.keys(a), ...Object.keys(b)])) {
+        const x = a[id] || {}, y = b[id] || {}, m = {};
+        for (const k of new Set([...Object.keys(x), ...Object.keys(y)])) {
+          const vx = x[k], vy = y[k];
+          if (typeof vx === "number" && typeof vy === "number") m[k] = k === "first" ? Math.min(vx, vy) : Math.max(vx, vy);
+          else m[k] = vx !== undefined ? vx : vy;
+        }
+        lv[id] = m;
+      }
+      const lt = local.track || {}, rt = remote.track || {};
+      out.track = Object.assign({}, rt, lt, { levels: lv, last: Math.max(lt.last || 0, rt.last || 0) });
+      out.track.cur = (lt.last || 0) >= (rt.last || 0) ? lt.cur : rt.cur;
+    }
     return out;
   }
 
@@ -80,7 +95,7 @@ const BipCloud = (() => {
     if (busy) { timer = setTimeout(push, 800); return; }
     busy = true; setStatus("saving");
     try {
-      await ref().set({ data: JSON.stringify(clean(cfg.getStore())), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await ref().set({ data: JSON.stringify(clean(cfg.getStore())), email: user.email || "", jeu: cfg.game, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       setStatus("saved");
     } catch (e) {
       setStatus("error");
@@ -210,6 +225,36 @@ const BipCloud = (() => {
     $("#cloud-out").addEventListener("click", async () => { close(); await logout(); });
   }
 
+  /* ---------- suivi pour le formateur ----------
+     Pour chaque mission : essais, erreurs, indices, solution, mauvaises
+     réponses, temps passé, dernière erreur. Rangé dans la progression. */
+  function track(kind, id, extra = {}) {
+    if (!cfg || !id) return;
+    const st = cfg.getStore(); if (!st) return;
+    const T = st.track || (st.track = { levels: {} });
+    if (!T.levels) T.levels = {};
+    const now = Date.now();
+    const lv = T.levels[id] || (T.levels[id] = {});
+    if (T.cur === id && T.last && now - T.last < 180000) lv.time = (lv.time || 0) + (now - T.last); // pauses de plus de 3 min ignorées
+    if (!lv.first) lv.first = now;
+    lv.lastAt = now; T.cur = id; T.last = now;
+    const inc = k => { lv[k] = (lv[k] || 0) + 1; };
+    if (kind === "open") inc("opens");
+    if (kind === "run") {
+      inc("runs");
+      if (extra.error) { inc("errors"); lv.lastErr = String(extra.error).slice(0, 160); }
+      else if (extra.ok === false) inc("fails");
+      if (extra.goals) lv.goals = extra.goals;
+      if (extra.ok) delete lv.lastErr;
+    }
+    if (kind === "hint") inc("hints");
+    if (kind === "solution") lv.solution = 1;
+    if (kind === "wrong") inc("wrong");
+    if (kind === "done") { if (!lv.doneAt) lv.doneAt = now; if (extra.stars) lv.stars = Math.max(lv.stars || 0, extra.stars); }
+    cfg.persist();
+    queue();
+  }
+
   /* ---------- bandeau sur l'accueil ---------- */
   function bannerHTML() {
     if (!auth) return "";
@@ -257,6 +302,6 @@ const BipCloud = (() => {
     });
   }
 
-  return { init, queue, bannerHTML, isLogged: () => !!user };
+  return { init, queue, track, bannerHTML, isLogged: () => !!user };
 })();
 window.BipCloud = BipCloud;

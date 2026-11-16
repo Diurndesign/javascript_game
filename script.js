@@ -561,6 +561,7 @@ const SANDBOX = {
 const KEY = "mission-bip-v1";
 let store = { progress: {}, drafts: {}, unlockAll: false };
 try { const raw = localStorage.getItem(KEY); if (raw) store = Object.assign(store, JSON.parse(raw)); } catch (e) { /* pas de stockage : on joue sans sauvegarde */ }
+const trk = (kind, id, extra) => { if (window.BipCloud) BipCloud.track(kind, id, extra); };
 function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* rien */ } if (window.BipCloud) BipCloud.queue(); }
 
 let current = null;
@@ -884,6 +885,7 @@ function openLevel(id) {
   if (!L) return showMap();
   current = L;
   session = { hints: 0, solution: false, attempts: 0, results: null, answers: {} };
+  if (!L.sandbox) trk("open", L.id);
   setHash(L.sandbox ? SANDBOX.id : "mission-" + L.id);
   const i = levelIndex(L.id);
   const ch = CHAPTERS.find(c => c.n === L.ch);
@@ -1053,6 +1055,7 @@ function runCode() {
   session.results = results;
   if (L.goals) renderGoals(results);
   const main = liveRun;
+  trk("run", L.id, { error: main.error ? (main.error.message || String(main.error)) : null, ok: results ? results.every(r => r.ok) : undefined, goals: results ? [results.filter(r => r.ok).length, results.length] : undefined });
   if (main.error) { selectTab("console"); setMood("oops"); }
   else if (results && results.every(r => r.ok)) { setMood("happy"); setTimeout(() => success(L), 350); }
   else if (results) { selectTab("goals"); setMood(null); }
@@ -1133,7 +1136,7 @@ function renderMemory(run) {
 /* ---------- Indices et solution ---------- */
 function showHint() {
   const L = current; if (session.hints >= L.hints.length) return;
-  session.hints++;
+  session.hints++; trk("hint", L.id);
   $("#help").hidden = false;
   $("#hint-list").innerHTML = L.hints.slice(0, session.hints).map(h => `<li>${md(h)}</li>`).join("");
   const left = L.hints.length - session.hints;
@@ -1179,7 +1182,7 @@ function bindQuiz(L) {
       const why = $(`#q-${qi} .q-why`); why.hidden = false; why.innerHTML = (ok ? "<strong>Juste.</strong> " : "<strong>Pas tout à fait.</strong> ") + md(q.why);
     });
     if (good === L.questions.length) { msg.textContent = "Tout est juste !"; setMood("happy"); setTimeout(() => success(L), 400); }
-    else { msg.textContent = `${good} / ${L.questions.length} bonnes réponses. Lis les explications et corrige.`; setMood("oops"); }
+    else { trk("wrong", L.id); msg.textContent = `${good} / ${L.questions.length} bonnes réponses. Lis les explications et corrige.`; setMood("oops"); }
   });
 }
 
@@ -1218,6 +1221,7 @@ function success(L) {
   const before = store.progress[L.id];
   const chapterBefore = chapterDone(L.ch);
   store.progress[L.id] = { stars: Math.max(before ? before.stars : 0, stars) };
+  trk("done", L.id, { stars });
   save(); updateStats();
   const newPiece = !chapterBefore && chapterDone(L.ch);
   const allDone = LEVELS.every(l => isDone(l.id));
@@ -1294,7 +1298,7 @@ document.addEventListener("click", e => {
   switch (t.id) {
     case "run": runCode(); break;
     case "hint": showHint(); break;
-    case "show-solution": twoStep(t, "Sûr ? (1 étoile)", () => { session.solution = true; $("#help").hidden = false; $("#solution-box").hidden = false; $("#solution-box").scrollIntoView({ block: "nearest", behavior: "smooth" }); }); break;
+    case "show-solution": twoStep(t, "Sûr ? (1 étoile)", () => { session.solution = true; trk("solution", current.id); $("#help").hidden = false; $("#solution-box").hidden = false; $("#solution-box").scrollIntoView({ block: "nearest", behavior: "smooth" }); }); break;
     case "copy-solution": { const ta = $("#code"); ta.value = current.solution; ta.dispatchEvent(new Event("input")); ta.focus(); break; }
     case "reset": twoStep(t, "Sûr ? Clique encore", () => { const ta = $("#code"); ta.value = current.starter; delete store.drafts[current.id]; save(); session.errLine = null; ta._paint(); }); break;
   }
