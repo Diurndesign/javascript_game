@@ -841,6 +841,10 @@ function showMap() {
       <ul class="parts">${CHAPTERS.map(c => `<li class="${done.has(c.n) ? "got" : ""}">${done.has(c.n) ? "✓ " : ""}${esc(c.piece)}</li>`).join("")}</ul>
     </div>
   </section>
+  ${allDone ? `<section class="suite-block">
+    <div><p class="kicker">La suite</p><h2>Bip Agence : on pousse le JavaScript plus loin</h2><p>Tu as terminé les 7 ateliers. Bip t’emmène en stage dans une agence web : 47 missions pour de vrais types de clients, le pourquoi de chaque notion, des schémas, et un projet bonus pour ton portfolio.</p></div>
+    <div><a class="btn btn-primary" href="${SUITE_URL}" target="_blank" rel="noopener">Continuer dans Bip Agence →</a></div>
+  </section>` : ""}
   <section class="howto" aria-label="Comment jouer">
     <div><b>1</b><p>Lis ce que demande Bip, la mission et la petite leçon.</p></div>
     <div><b>2</b><p>Écris ton code et clique sur <strong>Lancer</strong> (ou Ctrl + Entrée).</p></div>
@@ -1184,6 +1188,7 @@ function bindQuiz(L) {
 /* ---------- la suite : Bip Agence ---------- */
 const SUITE_URL = "https://diurndesign.github.io/javascript_avance/";
 function showSuite() {
+  store.suiteShown = true; save();
   $("#dialog").innerHTML = `
     <div class="dialog-top">${bipSVG(doneChapters(), "happy")}<div><p class="card-kicker">Les 7 ateliers sont terminés</p><h2 id="modal-title">Le jeu continue !</h2></div></div>
     <p>Bip est réparé, et toi, tu connais les bases du JavaScript. Maintenant, on les pousse plus loin : Bip a trouvé du travail dans une <strong>agence web</strong>, et il t’emmène en stage.</p>
@@ -1302,6 +1307,10 @@ $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#mo
 window.addEventListener("hashchange", route);
 
 if (window.claude && window.claude.hot) window.claude.hot.snapshot(() => ({ hash: location.hash }));
-const start = data => { if (data && data.hash && !location.hash) history.replaceState(null, "", data.hash); route(); };
+const start = data => {
+  if (data && data.hash && !location.hash) history.replaceState(null, "", data.hash);
+  route();
+  if (LEVELS.every(l => isDone(l.id)) && !store.suiteShown) { store.suiteShown = true; save(); showSuite(); }
+};
 window.claude && window.claude.hot && window.claude.hot.ready ? window.claude.hot.ready(start) : start((window.claude && window.claude.hot && window.claude.hot.data) || {});
 
