@@ -843,7 +843,7 @@ function showMap() {
   </section>
   ${window.BipCloud ? BipCloud.bannerHTML() : ""}
   ${allDone ? `<section class="suite-block">
-    <div><p class="kicker">La suite</p><h2>Bip Agence : on pousse le JavaScript plus loin</h2><p>Tu as terminé les 7 ateliers. Bip t’emmène en stage dans une agence web : 47 missions pour de vrais types de clients, le pourquoi de chaque notion, des schémas, et un projet bonus pour ton portfolio.</p></div>
+    <div><p class="kicker">La suite</p><h2>Bip Agence : on pousse le JavaScript plus loin</h2><p>Tu as terminé les 7 ateliers. Bip t’emmène en stage dans une agence web : 52 missions pour de vrais types de clients, le pourquoi de chaque notion, des schémas, et un projet bonus pour ton portfolio.</p></div>
     <div><a class="btn btn-primary" href="${SUITE_URL}" target="_blank" rel="noopener">Continuer dans Bip Agence →</a></div>
   </section>` : ""}
   <section class="howto" aria-label="Comment jouer">
@@ -1195,7 +1195,7 @@ function showSuite() {
     <p>Bip est réparé, et toi, tu connais les bases du JavaScript. Maintenant, on les pousse plus loin : Bip a trouvé du travail dans une <strong>agence web</strong>, et il t’emmène en stage.</p>
     <div class="suite-box"><p class="mini-label">Dans Bip Agence</p>
       <ul class="suite-list">
-        <li><b>47 missions</b> pour de vrais types de clients : site vitrine, appli, boutique, formulaire…</li>
+        <li><b>52 missions</b> pour de vrais types de clients : site vitrine, appli à plusieurs écrans, boutique, formulaire…</li>
         <li>Le <b>pourquoi</b> de chaque notion : où on la voit sur un site, et à quoi elle sert.</li>
         <li>Des <b>schémas</b>, et deux formations sur ce qui bloque souvent : le chemin pour retrouver, modifier ou supprimer une donnée, et les accolades.</li>
         <li>En bonus, quand tout est fini : un <b>projet pour ton portfolio</b>, où tu codes tout le JavaScript d’un site, d’une appli ou d’une boutique.</li>
