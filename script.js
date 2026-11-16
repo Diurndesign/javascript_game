@@ -1192,7 +1192,7 @@ function showSuite() {
         <li><b>47 missions</b> pour de vrais types de clients : site vitrine, appli, boutique, formulaire…</li>
         <li>Le <b>pourquoi</b> de chaque notion : où on la voit sur un site, et à quoi elle sert.</li>
         <li>Des <b>schémas</b>, et deux formations sur ce qui bloque souvent : le chemin pour retrouver, modifier ou supprimer une donnée, et les accolades.</li>
-        <li>Un <b>projet complet pour ton portfolio</b> : tu codes tout le JavaScript d’un site, d’une appli ou d’une boutique.</li>
+        <li>À la fin, tu es prêt pour coder le JavaScript du <b>site Valmont</b>.</li>
       </ul></div>
     <p style="color:var(--ink-soft);font-size:.92rem">Les premières missions reprennent ce que tu viens de voir, sous un autre angle : c’est voulu, c’est comme ça qu’on ancre les bases.</p>
     <div class="dialog-actions">
