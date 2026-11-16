@@ -828,7 +828,7 @@ function showMap() {
       <h1>Mission <span>Bip</span></h1>
       <p class="lead">Bip est un robot rangé au fond d’un atelier. Il ne comprend qu’une langue : le JavaScript. Écris du vrai code, regarde ce qu’il fait, et rends à Bip une pièce à chaque atelier terminé.</p>
       <div class="hero-actions">
-        ${allDone ? `<button class="btn btn-primary" type="button" data-open="${SANDBOX.id}">Bip est réparé ! Ouvrir le bac à sable</button>` : `<button class="btn btn-primary" type="button" data-open="${nxt.id}">${nb ? "Continuer" : "Commencer"} : mission ${nxtIdx}</button>`}
+        ${allDone ? `<a class="btn btn-primary" href="${SUITE_URL}" target="_blank" rel="noopener">Bip est réparé ! La suite : Bip Agence →</a>` : `<button class="btn btn-primary" type="button" data-open="${nxt.id}">${nb ? "Continuer" : "Commencer"} : mission ${nxtIdx}</button>`}
         <button class="btn" type="button" data-open="${SANDBOX.id}">Bac à sable</button>
       </div>
       <div class="progress">
@@ -1181,8 +1181,33 @@ function bindQuiz(L) {
 /* =====================================================================
    RÉUSSITE
    ===================================================================== */
+/* ---------- la suite : Bip Agence ---------- */
+const SUITE_URL = "https://diurndesign.github.io/javascript_avance/";
+function showSuite() {
+  $("#dialog").innerHTML = `
+    <div class="dialog-top">${bipSVG(doneChapters(), "happy")}<div><p class="card-kicker">Les 7 ateliers sont terminés</p><h2 id="modal-title">Le jeu continue !</h2></div></div>
+    <p>Bip est réparé, et toi, tu connais les bases du JavaScript. Maintenant, on les pousse plus loin : Bip a trouvé du travail dans une <strong>agence web</strong>, et il t’emmène en stage.</p>
+    <div class="suite-box"><p class="mini-label">Dans Bip Agence</p>
+      <ul class="suite-list">
+        <li><b>47 missions</b> pour de vrais types de clients : site vitrine, appli, boutique, formulaire…</li>
+        <li>Le <b>pourquoi</b> de chaque notion : où on la voit sur un site, et à quoi elle sert.</li>
+        <li>Des <b>schémas</b>, et deux formations sur ce qui bloque souvent : le chemin pour retrouver, modifier ou supprimer une donnée, et les accolades.</li>
+        <li>Un <b>projet complet pour ton portfolio</b> : tu codes tout le JavaScript d’un site, d’une appli ou d’une boutique.</li>
+      </ul></div>
+    <p style="color:var(--ink-soft);font-size:.92rem">Les premières missions reprennent ce que tu viens de voir, sous un autre angle : c’est voulu, c’est comme ça qu’on ancre les bases.</p>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" type="button" id="modal-later">Plus tard</button>
+      <a class="btn btn-primary" id="modal-suite" href="${SUITE_URL}" target="_blank" rel="noopener">Continuer dans Bip Agence →</a>
+    </div>`;
+  $("#modal").hidden = false;
+  $("#modal-later").addEventListener("click", () => { $("#modal").hidden = true; showMap(); });
+  $("#modal-suite").addEventListener("click", () => { $("#modal").hidden = true; });
+  $("#modal-suite").focus();
+}
+
 function success(L) {
   if (L.sandbox) return;
+  const allDoneBefore = LEVELS.every(l => isDone(l.id));
   const stars = L.quiz ? (session.attempts <= 1 ? 3 : session.attempts === 2 ? 2 : 1) : (session.solution ? 1 : session.hints > 0 ? 2 : 3);
   const before = store.progress[L.id];
   const chapterBefore = chapterDone(L.ch);
@@ -1193,6 +1218,7 @@ function success(L) {
   const i = levelIndex(L.id);
   const next = LEVELS[i + 1];
   const ch = CHAPTERS.find(c => c.n === L.ch);
+  const suite = (newPiece && L.ch === CHAPTERS[CHAPTERS.length - 1].n) || (allDone && !allDoneBefore);
   $("#dialog").innerHTML = `
     <div class="dialog-top">${bipSVG(doneChapters(), "happy")}<div><p class="card-kicker">Mission ${i + 1} réussie</p><h2 id="modal-title">${allDone ? "Bip est réparé !" : "Bien joué !"}</h2><div class="big-stars" aria-label="${stars} étoiles sur 3">${starsHTML(stars)}</div></div></div>
     ${newPiece ? `<p class="new-piece">Nouvelle pièce pour Bip : ${esc(ch.piece)} ! Atelier ${ch.n} terminé.</p>` : ""}
@@ -1200,13 +1226,14 @@ function success(L) {
     ${stars < 3 ? `<p style="color:var(--ink-soft);font-size:.92rem">Tu peux rejouer la mission plus tard sans indice pour gagner 3 étoiles.</p>` : ""}
     <div class="dialog-actions">
       <button class="btn btn-ghost" type="button" id="modal-stay">Rester ici</button>
-      ${next && !allDone ? `<button class="btn btn-primary" type="button" id="modal-next">Mission suivante →</button>` : `<button class="btn btn-primary" type="button" id="modal-map">Voir Bip sur la carte</button>`}
+      ${suite ? `<button class="btn btn-primary" type="button" id="modal-suite-open">La suite →</button>` : next && !allDone ? `<button class="btn btn-primary" type="button" id="modal-next">Mission suivante →</button>` : `<button class="btn btn-primary" type="button" id="modal-map">Voir Bip sur la carte</button>`}
     </div>`;
   $("#modal").hidden = false;
   const close = () => { $("#modal").hidden = true; };
   $("#modal-stay").addEventListener("click", close);
   if ($("#modal-next")) { $("#modal-next").addEventListener("click", () => { close(); openLevel(next.id); }); $("#modal-next").focus(); }
   if ($("#modal-map")) { $("#modal-map").addEventListener("click", () => { close(); showMap(); }); $("#modal-map").focus(); }
+  if ($("#modal-suite-open")) { $("#modal-suite-open").addEventListener("click", showSuite); $("#modal-suite-open").focus(); }
   confetti(newPiece || allDone ? 160 : 70);
 }
 function confetti(n) {

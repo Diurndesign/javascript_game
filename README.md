@@ -55,3 +55,8 @@ La bibliothèque [acorn](https://github.com/acornjs/acorn) est chargée depuis j
 ---
 
 Créé par Diurn Studio pour le module Intégration & Développement Web (ITECOM Art Design, Nice).
+
+## La suite : Bip Agence
+
+Une fois les 7 ateliers terminés, une fenêtre propose de continuer dans **Bip Agence** ([javascript_avance](https://github.com/Diurndesign/javascript_avance)) : 47 missions pour de vrais types de clients, le pourquoi de chaque notion, et un projet complet pour le portfolio.
+Le lien pointe vers la version en ligne : https://diurndesign.github.io/javascript_avance/ (GitHub Pages doit être activé sur le dépôt javascript_avance).

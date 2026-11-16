@@ -322,3 +322,8 @@ main { padding: clamp(16px, 3vw, 32px); max-width: 1360px; margin: 0 auto; }
   .says { grid-template-columns: 56px 1fr; }
   .says svg { width: 56px; }
 }
+
+/* ---------- la suite : Bip Agence ---------- */
+a.btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.suite-box { background: var(--chip, #E3E8F2); border: 2px solid var(--ink); border-radius: 14px; padding: 12px 14px; }
+.suite-list { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 6px; }
