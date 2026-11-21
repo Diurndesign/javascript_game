@@ -82,6 +82,10 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid
         && jeu in ['mission-bip', 'bip-agence'];
     }
+    match /eleves/{uid}/atelier/{doc} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if estFormateur();
+    }
     match /{chemin=**}/jeux/{jeu} {
       allow read: if estFormateur();
     }
