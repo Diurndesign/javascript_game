@@ -66,7 +66,7 @@ Rappel aux élèves : noter son e-mail et son mot de passe, et se déconnecter e
 
 Mission Bip est la 6ᵉ étape d'une série de jeux, reliés par le même compte (liens en bas de page) :
 [La maison de Bip](https://diurndesign.github.io/Html_game/) (HTML), [Mission Kami](https://diurndesign.github.io/Css_game/) (CSS),
-[Kami et les lucioles](https://diurndesign.github.io/Flexbox-game/) (Flexbox), [Le potager de Kami](https://diurndesign.github.io/Grid-game/) (Grid), [Kami s’adapte](https://diurndesign.github.io/responsive-game/) (Responsive).
+[Kami et les lucioles](https://diurndesign.github.io/Flexbox-game/) (Flexbox), [Le potager de Kami](https://diurndesign.github.io/Grid-game/) (Grid), [Kami s’adapte](https://diurndesign.github.io/Responsive-game/) (Responsive).
 La liste de leurs missions pour l'espace formateur est dans `js/admin-missions-web.js` (généré à partir des fichiers `game.js` des cinq jeux : à mettre à jour si on ajoute ou renomme des missions).
 
 ## La suite : Bip Agence

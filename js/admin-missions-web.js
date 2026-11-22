@@ -768,7 +768,7 @@ Object.assign(JEUX, {
  "kami-ecrans": {
   "titre": "Kami s’adapte",
   "court": "Responsive",
-  "url": "https://diurndesign.github.io/responsive-game/",
+  "url": "https://diurndesign.github.io/Responsive-game/",
   "groupes": [
    {
     "n": 1,
