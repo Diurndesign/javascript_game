@@ -372,3 +372,4 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; justif
 .pied-jeu-in .serie { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-left: auto; }
 .pied-jeu-in .serie a { color: var(--ink); font-weight: 700; }
 .pied-jeu-in .serie a[aria-current] { text-decoration: none; background: var(--bip); border-radius: 6px; padding: 0 6px; }
+.pied-jeu-in .serie .atelier { border-left: 2px solid var(--ink-soft); padding-left: 14px; }
