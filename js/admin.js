@@ -1,6 +1,8 @@
 "use strict";
 /* =====================================================================
-   ESPACE FORMATEUR : voir la progression des élèves (Mission Bip et Bip Agence)
+   ESPACE FORMATEUR : voir la progression des élèves dans tous les jeux de code :
+   La maison de Bip (HTML), Mission Kami (CSS), Kami et les lucioles (Flexbox),
+   Le potager de Kami (Grid), Mission Bip et Bip Agence (JavaScript)
    Lecture seule. L'accès est réservé par les règles Firestore à l'UID du formateur.
    ===================================================================== */
 const FB_CONFIG = {
@@ -14,6 +16,11 @@ const FB_CONFIG = {
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 const DAY = 86400000;
+/* l’ordre du parcours ; les jeux absents de JEUX sont ignorés */
+const ORDRE = ["maison-bip", "mission-kami", "kami-lucioles", "kami-potager", "mission-bip", "bip-agence"];
+const COURT = { "mission-bip": "JS", "bip-agence": "JS+" };
+const jeuxDansLOrdre = () => [...ORDRE.filter(j => JEUX[j]), ...Object.keys(JEUX).filter(j => !ORDRE.includes(j))];
+const court = jeu => (JEUX[jeu] && JEUX[jeu].court) || COURT[jeu] || jeu;
 let auth = null, db = null, me = null, eleves = [], vue = { tri: "activite", filtre: "", detail: null };
 
 /* ---------- outils d'affichage ---------- */
@@ -57,7 +64,7 @@ function analyse(jeu, data) {
 function ecranConnexion(msg) {
   $("#app").innerHTML = `<section class="carte connexion">
     <p class="surtitre">Espace formateur</p><h1>Connexion</h1>
-    <p>Connecte-toi avec <b>ton</b> compte des jeux (le même e-mail et mot de passe que dans Mission Bip ou Bip Agence).</p>
+    <p>Connecte-toi avec <b>ton</b> compte des jeux (le même e-mail et mot de passe que dans La maison de Bip, Mission Kami, Mission Bip ou Bip Agence).</p>
     <form id="f-co" class="form" novalidate>
       <label>E-mail<input id="co-email" type="email" autocomplete="email" required></label>
       <label>Mot de passe<input id="co-pass" type="password" autocomplete="current-password" required></label>
@@ -80,7 +87,7 @@ service cloud.firestore {
     }
     match /eleves/{uid}/jeux/{jeu} {
       allow read, write: if request.auth != null && request.auth.uid == uid
-        && jeu in ['mission-bip', 'bip-agence'];
+        && jeu in ['mission-bip', 'bip-agence', 'maison-bip', 'mission-kami', 'kami-lucioles', 'kami-potager'];
     }
     match /eleves/{uid}/atelier/{doc} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
@@ -142,11 +149,19 @@ function barre(g) {
   const pct = Math.round(g.faites / g.total * 100);
   return `<div class="prog"><div class="prog-bar"><span style="width:${pct}%"></span></div><span><b>${g.faites}</b> / ${g.total} · ${g.etoiles} ★</span></div>`;
 }
+/* une petite barre par jeu commencé, dans l’ordre du parcours */
+function parcours(e) {
+  const l = jeuxDansLOrdre().filter(j => e.jeux[j]);
+  if (!l.length) return `<span class="vide">pas commencé</span>`;
+  return `<div class="parcours">${l.map(j => { const g = e.jeux[j]; const pct = Math.round(g.faites / g.total * 100);
+    return `<div class="pj" title="${esc(JEUX[j].titre)}"><span class="pj-nom">${esc(court(j))}</span><div class="prog-bar"><span style="width:${pct}%"></span></div><span class="pj-n"><b>${g.faites}</b>/${g.total}</span></div>`; }).join("")}
+    ${e.jeux["bip-agence"] && e.jeux["bip-agence"].projet ? `<small class="projet-mini">Projet bonus : ${Object.keys(e.jeux["bip-agence"].projet.steps || {}).length} / 7 étapes</small>` : ""}</div>`;
+}
 function alertes(e) {
   const out = [];
   for (const [jeu, g] of Object.entries(e.jeux)) {
     if (g.bloque) out.push(`<span class="tag rouge" title="${esc(JEUX[jeu].titre)}">Bloqué : ${esc(g.encours.titre)}</span>`);
-    if (g.sols) out.push(`<span class="tag orange">${g.sols} solution${g.sols > 1 ? "s" : ""} (${jeu === "mission-bip" ? "MB" : "BA"})</span>`);
+    if (g.sols) out.push(`<span class="tag orange">${g.sols} solution${g.sols > 1 ? "s" : ""} (${esc(court(jeu))})</span>`);
   }
   if (e.dernier && Date.now() - e.dernier > 5 * DAY) out.push(`<span class="tag gris">Inactif ${depuis(e.dernier)}</span>`);
   return out.join(" ") || `<span class="tag vert">RAS</span>`;
@@ -161,7 +176,7 @@ function encours(e) {
 function afficherListe() {
   vue.detail = null;
   let liste = eleves.filter(e => !vue.filtre || (e.email || e.uid).toLowerCase().includes(vue.filtre.toLowerCase()));
-  const score = e => (e.jeux["mission-bip"] ? e.jeux["mission-bip"].faites : 0) + (e.jeux["bip-agence"] ? e.jeux["bip-agence"].faites : 0);
+  const score = e => Object.values(e.jeux).reduce((s, g) => s + g.faites, 0);
   liste.sort(vue.tri === "nom" ? (a, b) => nomEleve(a).localeCompare(nomEleve(b)) : vue.tri === "avance" ? (a, b) => score(b) - score(a) : vue.tri === "bloques" ? (a, b) => (b.bloque - a.bloque) || (b.dernier - a.dernier) : (a, b) => b.dernier - a.dernier);
   const vrais = eleves.filter(e => !e.moi);
   const actifs = vrais.filter(e => Date.now() - e.dernier < DAY).length;
@@ -171,8 +186,7 @@ function afficherListe() {
       <div><b>${vrais.length}</b><span>élève${vrais.length > 1 ? "s" : ""} inscrit${vrais.length > 1 ? "s" : ""}</span></div>
       <div><b>${actifs}</b><span>actif${actifs > 1 ? "s" : ""} ces 24 h</span></div>
       <div class="${vrais.some(e => e.bloque) ? "alerte" : ""}"><b>${vrais.filter(e => e.bloque).length}</b><span>bloqué${vrais.filter(e => e.bloque).length > 1 ? "s" : ""} en ce moment</span></div>
-      <div><b>${moy("mission-bip")} / ${JEUX["mission-bip"].missions.length}</b><span>moyenne Mission Bip</span></div>
-      <div><b>${moy("bip-agence")} / ${JEUX["bip-agence"].missions.length}</b><span>moyenne Bip Agence</span></div>
+      ${jeuxDansLOrdre().filter(j => vrais.some(e => e.jeux[j]) || j === "mission-bip").map(j => `<div><b>${moy(j)} / ${JEUX[j].missions.length}</b><span>moyenne ${esc(JEUX[j].titre)}</span></div>`).join("")}
     </section>
     <section class="carte">
       <div class="outils"><h2>Les élèves</h2>
@@ -180,14 +194,13 @@ function afficherListe() {
         <label>Trier <select id="tri"><option value="activite">dernière activité</option><option value="avance">les plus avancés</option><option value="bloques">les bloqués d’abord</option><option value="nom">nom</option></select></label>
       </div>
       ${liste.length ? `<div class="table-wrap"><table class="table">
-        <thead><tr><th>Élève</th><th>Mission Bip</th><th>Bip Agence</th><th>En ce moment</th><th>Dernière activité</th><th>Alertes</th></tr></thead>
+        <thead><tr><th>Élève</th><th>Parcours</th><th>En ce moment</th><th>Dernière activité</th><th>Alertes</th></tr></thead>
         <tbody>${liste.map(e => `<tr data-uid="${esc(e.uid)}" tabindex="0">
           <td><b>${esc(nomEleve(e))}</b>${e.moi ? ` <span class="tag gris">toi</span>` : ""}<br><small>${esc(e.email)}</small></td>
-          <td>${barre(e.jeux["mission-bip"])}</td>
-          <td>${barre(e.jeux["bip-agence"])}${e.jeux["bip-agence"] && e.jeux["bip-agence"].projet ? `<small class="projet-mini">Projet bonus : ${Object.keys(e.jeux["bip-agence"].projet.steps || {}).length} / 7 étapes</small>` : ""}</td>
+          <td>${parcours(e)}</td>
           <td>${encours(e)}</td>
           <td>${depuis(e.dernier)}</td>
-          <td>${alertes(e)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="vide-gros">Aucun élève pour l’instant. Ils apparaissent ici dès qu’ils créent leur compte dans un des deux jeux.</p>`}
+          <td>${alertes(e)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="vide-gros">Aucun élève pour l’instant. Ils apparaissent ici dès qu’ils créent leur compte dans un des jeux.</p>`}
     </section>
     ${difficiles()}`;
   $("#tri").value = vue.tri;
@@ -231,9 +244,9 @@ function codeDe(data, id) {
 function afficherDetail(uid) {
   const e = eleves.find(x => x.uid === uid); if (!e) return afficherListe();
   vue.detail = uid;
-  const blocs = Object.keys(JEUX).map(jeu => {
+  const pasCommences = jeuxDansLOrdre().filter(j => !e.jeux[j]);
+  const blocs = jeuxDansLOrdre().filter(j => e.jeux[j]).map(jeu => {
     const g = e.jeux[jeu]; const J = JEUX[jeu];
-    if (!g) return `<section class="carte"><h2>${esc(J.titre)}</h2><p class="vide">Pas encore commencé (ou joué sans compte).</p></section>`;
     const groupes = J.groupes.map(gr => {
       const ms = J.missions.filter(m => m.g === gr.n);
       const faites = ms.filter(m => g.prog[m.id]).length;
@@ -262,7 +275,8 @@ function afficherDetail(uid) {
       ${groupes}${projet}</section>`;
   }).join("");
   $("#app").innerHTML = `<p><button class="btn" type="button" id="retour">← Tous les élèves</button></p>
-    <section class="carte entete-eleve"><div><p class="surtitre">Élève</p><h1>${esc(nomEleve(e))}</h1><p>${esc(e.email)} · dernière activité ${depuis(e.dernier)}</p></div><div>${alertes(e)}</div></section>${blocs}`;
+    <section class="carte entete-eleve"><div><p class="surtitre">Élève</p><h1>${esc(nomEleve(e))}</h1><p>${esc(e.email)} · dernière activité ${depuis(e.dernier)}</p></div><div>${alertes(e)}</div></section>${blocs}
+    ${pasCommences.length ? `<section class="carte"><h2>Pas encore commencé</h2><p class="vide">${pasCommences.map(j => esc(JEUX[j].titre)).join(" · ")} (ou joué sans compte).</p></section>` : ""}`;
   $("#retour").addEventListener("click", afficherListe);
   document.querySelectorAll("[data-voir]").forEach(b => b.addEventListener("click", () => { const [jeu, id] = b.dataset.voir.split("|"); const row = document.getElementById("code-" + jeu + "-" + id); row.hidden = !row.hidden; b.textContent = row.hidden ? "Voir" : "Cacher"; }));
   window.scrollTo(0, 0);

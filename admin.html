@@ -54,6 +54,11 @@
   .prog-bar { height: 8px; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; background: #fff; }
   .prog-bar span { display: block; height: 100%; background: var(--bip); }
   .projet-mini { display: block; margin-top: 4px; color: var(--soft); }
+  .parcours { display: grid; gap: 4px; min-width: 210px; }
+  .pj { display: grid; grid-template-columns: 58px 1fr auto; gap: 8px; align-items: center; font-size: .82rem; }
+  .pj-nom { font-weight: 700; color: var(--soft); }
+  .pj .prog-bar { height: 7px; }
+  .pj-n { white-space: nowrap; }
   .tag { display: inline-block; font-size: .78rem; font-weight: 700; border-radius: 999px; padding: 1px 9px; border: 1.5px solid currentColor; margin: 0 2px 4px 0; white-space: nowrap; }
   .tag.rouge { color: var(--ko); background: #FFE3DE; } .tag.orange { color: #B45309; background: #FFF1DA; } .tag.gris { color: var(--soft); } .tag.vert { color: var(--ok); background: #E3F5EC; } .tag.jaune { color: #8A6100; background: #FFF4D1; }
   .ok { color: #C98A00; letter-spacing: 1px; }
@@ -80,6 +85,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="js/admin-missions.js"></script>
+<script src="js/admin-missions-web.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>
