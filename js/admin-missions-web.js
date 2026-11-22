@@ -1,7 +1,7 @@
 "use strict";
-/* Généré automatiquement par make-admin-missions.js (dossier shared des jeux) :
+/* Généré automatiquement à partir des fichiers game.js des jeux HTML, CSS, Flexbox et Grid :
    les missions des jeux HTML, CSS, Flexbox et Grid, ajoutées à la page formateur.
-   Ne pas modifier à la main : relancer le générateur après un changement de missions. */
+   À mettre à jour si on ajoute, supprime ou renomme des missions dans ces jeux. */
 Object.assign(JEUX, {
  "maison-bip": {
   "titre": "La maison de Bip",
