@@ -58,16 +58,16 @@ Créé par Diurn Studio pour le module Intégration & Développement Web (ITECOM
 
 ## La sauvegarde en ligne
 
-Sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans Firebase (projet « bip-jeux », plan gratuit) et l'élève la retrouve sur n'importe quel ordinateur. Le même compte sert pour tous les jeux de la série : La maison de Bip (HTML), Mission Kami (CSS), Kami et les lucioles (Flexbox), Le potager de Kami (Grid), Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
+Sans compte, la progression reste dans le navigateur. Avec un compte (**e-mail + mot de passe**, bouton « Se connecter » en haut), elle est enregistrée en ligne dans Firebase (projet « bip-jeux », plan gratuit) et l'élève la retrouve sur n'importe quel ordinateur. Le même compte sert pour tous les jeux de la série : La maison de Bip (HTML), Mission Kami (CSS), Kami et les lucioles (Flexbox), Le potager de Kami (Grid), Kami s’adapte (Responsive), Mission Bip et Bip Agence. Chaque élève ne peut lire et modifier que sa propre progression.
 
 Rappel aux élèves : noter son e-mail et son mot de passe, et se déconnecter en partant d'un ordinateur de l'école.
 
 ## Avant Mission Bip : les jeux HTML et CSS
 
-Mission Bip est la 5ᵉ étape d'une série de jeux, reliés par le même compte (liens en bas de page) :
+Mission Bip est la 6ᵉ étape d'une série de jeux, reliés par le même compte (liens en bas de page) :
 [La maison de Bip](https://diurndesign.github.io/Html_game/) (HTML), [Mission Kami](https://diurndesign.github.io/Css_game/) (CSS),
-[Kami et les lucioles](https://diurndesign.github.io/Flexbox-game/) (Flexbox), [Le potager de Kami](https://diurndesign.github.io/Grid-game/) (Grid).
-La liste de leurs missions pour l'espace formateur est dans `js/admin-missions-web.js` (généré à partir des fichiers `game.js` des quatre jeux : à mettre à jour si on ajoute ou renomme des missions).
+[Kami et les lucioles](https://diurndesign.github.io/Flexbox-game/) (Flexbox), [Le potager de Kami](https://diurndesign.github.io/Grid-game/) (Grid), [Kami s’adapte](https://diurndesign.github.io/responsive-game/) (Responsive).
+La liste de leurs missions pour l'espace formateur est dans `js/admin-missions-web.js` (généré à partir des fichiers `game.js` des cinq jeux : à mettre à jour si on ajoute ou renomme des missions).
 
 ## La suite : Bip Agence
 
@@ -76,4 +76,4 @@ Le lien pointe vers la version en ligne : https://diurndesign.github.io/javascri
 
 ## L'espace formateur
 
-Page : `admin.html` (https://diurndesign.github.io/javascript_game/admin.html). Le formateur s'y connecte avec son compte et voit la progression de chaque élève dans **tous les jeux de la série**, dans l'ordre du parcours (HTML, CSS, Flexbox, Grid, JavaScript, Bip Agence) : missions faites, étoiles, mission en cours, élèves bloqués, essais, erreurs, indices, solutions vues, temps passé et code tapé.
+Page : `admin.html` (https://diurndesign.github.io/javascript_game/admin.html). Le formateur s'y connecte avec son compte et voit la progression de chaque élève dans **tous les jeux de la série**, dans l'ordre du parcours (HTML, CSS, Flexbox, Grid, Responsive, JavaScript, Bip Agence) : missions faites, étoiles, mission en cours, élèves bloqués, essais, erreurs, indices, solutions vues, temps passé et code tapé.

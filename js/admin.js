@@ -2,7 +2,7 @@
 /* =====================================================================
    ESPACE FORMATEUR : voir la progression des élèves dans tous les jeux de code :
    La maison de Bip (HTML), Mission Kami (CSS), Kami et les lucioles (Flexbox),
-   Le potager de Kami (Grid), Mission Bip et Bip Agence (JavaScript)
+   Le potager de Kami (Grid), Kami s’adapte (Responsive), Mission Bip et Bip Agence (JavaScript)
    Lecture seule. L'accès est réservé par les règles Firestore à l'UID du formateur.
    ===================================================================== */
 const FB_CONFIG = {
@@ -17,7 +17,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 const DAY = 86400000;
 /* l’ordre du parcours ; les jeux absents de JEUX sont ignorés */
-const ORDRE = ["maison-bip", "mission-kami", "kami-lucioles", "kami-potager", "mission-bip", "bip-agence"];
+const ORDRE = ["maison-bip", "mission-kami", "kami-lucioles", "kami-potager", "kami-ecrans", "mission-bip", "bip-agence"];
 const COURT = { "mission-bip": "JS", "bip-agence": "JS+" };
 const jeuxDansLOrdre = () => [...ORDRE.filter(j => JEUX[j]), ...Object.keys(JEUX).filter(j => !ORDRE.includes(j))];
 const court = jeu => (JEUX[jeu] && JEUX[jeu].court) || COURT[jeu] || jeu;
@@ -87,7 +87,7 @@ service cloud.firestore {
     }
     match /eleves/{uid}/jeux/{jeu} {
       allow read, write: if request.auth != null && request.auth.uid == uid
-        && jeu in ['mission-bip', 'bip-agence', 'maison-bip', 'mission-kami', 'kami-lucioles', 'kami-potager'];
+        && jeu in ['mission-bip', 'bip-agence', 'maison-bip', 'mission-kami', 'kami-lucioles', 'kami-potager', 'kami-ecrans'];
     }
     match /eleves/{uid}/atelier/{doc} {
       allow read, write: if request.auth != null && request.auth.uid == uid;

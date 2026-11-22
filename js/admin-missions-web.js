@@ -1,6 +1,6 @@
 "use strict";
-/* Généré automatiquement à partir des fichiers game.js des jeux HTML, CSS, Flexbox et Grid :
-   les missions des jeux HTML, CSS, Flexbox et Grid, ajoutées à la page formateur.
+/* Généré automatiquement à partir des fichiers game.js des jeux HTML, CSS, Flexbox, Grid et Responsive :
+   les missions des jeux HTML, CSS, Flexbox, Grid et Responsive, ajoutées à la page formateur.
    À mettre à jour si on ajoute, supprime ou renomme des missions dans ces jeux. */
 Object.assign(JEUX, {
  "maison-bip": {
@@ -761,6 +761,207 @@ Object.assign(JEUX, {
     "g": 6,
     "num": 21,
     "titre": "La fête du potager",
+    "type": "code"
+   }
+  ]
+ },
+ "kami-ecrans": {
+  "titre": "Kami s’adapte",
+  "court": "Responsive",
+  "url": "https://diurndesign.github.io/responsive-game/",
+  "groupes": [
+   {
+    "n": 1,
+    "nom": "Atelier 1 · Penser mobile"
+   },
+   {
+    "n": 2,
+    "nom": "Atelier 2 · Les media queries"
+   },
+   {
+    "n": 3,
+    "nom": "Atelier 3 · Les unités fluides"
+   },
+   {
+    "n": 4,
+    "nom": "Atelier 4 · Des mises en page qui s’adaptent"
+   },
+   {
+    "n": 5,
+    "nom": "Atelier 5 · Des composants adaptables"
+   },
+   {
+    "n": 6,
+    "nom": "Atelier 6 · Médias et page complète"
+   }
+  ],
+  "missions": [
+   {
+    "id": "ecrans",
+    "g": 1,
+    "num": 1,
+    "titre": "Kami change d’écran",
+    "type": "code"
+   },
+   {
+    "id": "image-fluide",
+    "g": 1,
+    "num": 2,
+    "titre": "La photo qui déborde",
+    "type": "code"
+   },
+   {
+    "id": "largeurs-fluides",
+    "g": 1,
+    "num": 3,
+    "titre": "La barre de recherche",
+    "type": "code"
+   },
+   {
+    "id": "quiz1",
+    "g": 1,
+    "num": 4,
+    "titre": "Contrôle du téléphone",
+    "type": "quiz"
+   },
+   {
+    "id": "menu-colonne",
+    "g": 2,
+    "num": 5,
+    "titre": "Le menu qui s’empile",
+    "type": "code"
+   },
+   {
+    "id": "mobile-dabord",
+    "g": 2,
+    "num": 6,
+    "titre": "Le grillon du jour",
+    "type": "code"
+   },
+   {
+    "id": "points-de-rupture",
+    "g": 2,
+    "num": 7,
+    "titre": "Le carnet de voyage",
+    "type": "code"
+   },
+   {
+    "id": "afficher-masquer",
+    "g": 2,
+    "num": 8,
+    "titre": "Le bon bouton au bon endroit",
+    "type": "code"
+   },
+   {
+    "id": "rem-em",
+    "g": 3,
+    "num": 9,
+    "titre": "La recette de Kami",
+    "type": "code"
+   },
+   {
+    "id": "vw-vh",
+    "g": 3,
+    "num": 10,
+    "titre": "La bannière géante",
+    "type": "code"
+   },
+   {
+    "id": "clamp-titre",
+    "g": 3,
+    "num": 11,
+    "titre": "Le titre bien élevé",
+    "type": "code"
+   },
+   {
+    "id": "min-max",
+    "g": 3,
+    "num": 12,
+    "titre": "La carte de membre",
+    "type": "code"
+   },
+   {
+    "id": "cartes-wrap",
+    "g": 4,
+    "num": 13,
+    "titre": "Les amis de Kami",
+    "type": "code"
+   },
+   {
+    "id": "grille-auto",
+    "g": 4,
+    "num": 14,
+    "titre": "La boutique de Kami",
+    "type": "code"
+   },
+   {
+    "id": "zones-rupture",
+    "g": 4,
+    "num": 15,
+    "titre": "Le journal de Kami",
+    "type": "code"
+   },
+   {
+    "id": "quiz2",
+    "g": 4,
+    "num": 16,
+    "titre": "Contrôle du grand écran",
+    "type": "quiz"
+   },
+   {
+    "id": "menu-responsive",
+    "g": 5,
+    "num": 17,
+    "titre": "Le menu au bout des doigts",
+    "type": "code"
+   },
+   {
+    "id": "tableau-defilant",
+    "g": 5,
+    "num": 18,
+    "titre": "Les horaires du bus",
+    "type": "code"
+   },
+   {
+    "id": "texte-lisible",
+    "g": 5,
+    "num": 19,
+    "titre": "Un article qui se lit bien",
+    "type": "code"
+   },
+   {
+    "id": "conteneur-centre",
+    "g": 5,
+    "num": 20,
+    "titre": "Bien au milieu",
+    "type": "code"
+   },
+   {
+    "id": "vignettes",
+    "g": 6,
+    "num": 21,
+    "titre": "La galerie bien rangée",
+    "type": "code"
+   },
+   {
+    "id": "picture-srcset",
+    "g": 6,
+    "num": 22,
+    "titre": "La bonne photo pour chaque écran",
+    "type": "code"
+   },
+   {
+    "id": "quiz3",
+    "g": 6,
+    "num": 23,
+    "titre": "Contrôle des images",
+    "type": "quiz"
+   },
+   {
+    "id": "finale",
+    "g": 6,
+    "num": 24,
+    "titre": "La page d’accueil de Kami",
     "type": "code"
    }
   ]
