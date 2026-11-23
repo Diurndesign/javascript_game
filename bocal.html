@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bocal sans JS, avec JS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: un prof qui montre, pas qui explique : on touche, on compare.
+   IDEA: deux téléphones identiques posés sur la table, un éteint côté réflexes, un vivant.
+   PICTURE: l'appli Bocal en double, jouable, avec la note de ce qui vient de se passer.
+   COLOUR and TYPE: identité Bocal (vert #2F7D5B, tomate #F26B3A, crème), Fraunces + Manrope.
+   LAYOUT: bandeau vert, deux colonnes de téléphones, sur mobile un sélecteur Sans / Avec. */
+:root{color-scheme:light dark;--bg:light-dark(#FBF7EF,#0F1713);--ink:light-dark(#1F2A24,#E8EFE9);--soft:light-dark(#5E6B63,#A3B3A9);--line:light-dark(#E6DECD,#26352D);--panel:light-dark(#FFFFFF,#16221C);--green:#2F7D5B;--green-t:light-dark(#2F7D5B,#74CFA2);--tomato:#F26B3A}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.hero{background:var(--green);color:#fff;padding-bottom:clamp(28px,4vw,48px)}
+.hero-in{max-width:980px;margin:0 auto}
+h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0 0 12px;text-wrap:balance}
+.hero p{margin:0;max-width:60ch;font-size:17px;opacity:.95}
+h2{font-family:Fraunces,Georgia,serif;font-size:clamp(26px,3.4vw,34px);line-height:1.1;margin:0 0 18px;text-wrap:balance}
+
+.switch{display:none;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px;max-width:340px;margin:0 auto 18px}
+.switch button{flex:1;height:44px;border:0;border-radius:999px;background:none;color:var(--ink);font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.switch button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;max-width:980px;margin:0 auto}
+.col{display:flex;flex-direction:column;align-items:center;gap:16px}
+.tag{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:15px;padding:8px 16px;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
+.tag i{width:10px;height:10px;border-radius:50%;background:#B8B2A6}
+.col.on .tag{background:var(--green);border-color:var(--green);color:#fff}
+.col.on .tag i{background:#9BF0C3;box-shadow:0 0 0 4px rgba(155,240,195,.25)}
+
+.phone{width:340px;max-width:100%;height:680px;border-radius:46px;background:#141414;padding:11px;box-shadow:0 30px 60px -25px rgba(20,30,25,.45),inset 0 0 0 2px #2c2c2c}
+.col.off .phone{filter:saturate(.85)}
+.app{--a-bg:#FBF7EF;--a-surface:#fff;--a-ink:#1F2A24;--a-soft:#5E6B63;--a-line:#EAE2D2;position:relative;height:100%;border-radius:36px;overflow:hidden;display:flex;flex-direction:column;background:var(--a-bg);color:var(--a-ink);transition:background .35s,color .35s;color-scheme:light}
+.app.dark{--a-bg:#111B16;--a-surface:#1B2922;--a-ink:#E9F1EB;--a-soft:#9DB0A4;--a-line:#2B3B32;color-scheme:dark}
+.app-bar{background:linear-gradient(140deg,#2F7D5B,#215840);color:#fff;padding:20px 18px 18px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:700}
+.actions{display:flex;gap:8px}
+.icon-btn,.avatar{width:42px;height:42px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;font:inherit}
+.icon-btn{background:rgba(255,255,255,.16);color:#fff}
+.avatar{background:var(--tomato);color:#fff;font-weight:800;font-size:13px;transition:box-shadow .25s}
+.avatar.logged{box-shadow:0 0 0 3px #fff}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.greet{font-family:Fraunces,Georgia,serif;font-size:26px;line-height:1.1;margin:18px 0 4px}
+.saved{margin:0;font-size:14px;opacity:.92}
+.saved strong{font-size:16px}
+.body{flex:1;overflow-y:auto;padding:16px 16px 20px;display:flex;flex-direction:column;gap:14px}
+.body>*{flex-shrink:0}
+.search,.add input,.add select,.login input{width:100%;height:44px;border-radius:12px;border:1px solid var(--a-line);background:var(--a-surface);color:var(--a-ink);padding:0 14px;font:inherit;font-size:16px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter{height:38px;padding:0 15px;border-radius:999px;border:1px solid var(--a-line);background:var(--a-surface);color:var(--a-ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.filter.on{background:var(--green);border-color:var(--green);color:#fff}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;align-items:center;background:var(--a-surface);border-radius:16px;padding:12px 14px;box-shadow:0 2px 10px rgba(31,42,36,.07)}
+.card.new{animation:pop .45s ease-out}
+.name{margin:0;font-weight:800;font-size:15px;overflow-wrap:anywhere}
+.when{margin:0;font-size:13px;color:var(--a-soft)}
+.badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:#E1F0E7;color:#226A49;white-space:nowrap}
+.card.urgent .badge{background:#FDE3D8;color:#B8401A}
+.eat{grid-column:1/-1;justify-self:start;height:34px;padding:0 12px;border-radius:10px;border:1px dashed var(--a-line);background:transparent;color:var(--a-ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.empty{text-align:center;color:var(--a-soft);font-size:14px;padding:18px}
+.add{background:var(--a-surface);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.add input,.add select{background:var(--a-bg)}
+.add-t{margin:0;font-family:Fraunces,Georgia,serif;font-size:18px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:8px}
+.button{height:44px;border:0;border-radius:12px;background:var(--tomato);color:#fff;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.tab-bar{display:flex;justify-content:space-around;padding:10px 8px 14px;background:var(--a-surface);border-top:1px solid var(--a-line)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--a-soft)}
+.tab.on{color:var(--green)}
+.app.dark .tab.on{color:#74CFA2}
+.sheet{position:absolute;inset:0;background:rgba(10,20,15,.5);display:flex;align-items:flex-end}
+.sheet[hidden]{display:none}
+.login{background:var(--a-surface);width:100%;border-radius:24px 24px 0 0;padding:22px 18px 26px;display:flex;flex-direction:column;gap:10px;animation:up .3s ease-out}
+.login .add-t{font-size:22px}
+.login label{font-size:14px;font-weight:700}
+.login input{background:var(--a-bg)}
+.err{color:#D2491D;font-weight:800;font-size:14px;margin:0}
+.ghost{height:40px;border:0;background:none;color:var(--a-soft);font:inherit;font-weight:700;cursor:pointer}
+.clue{margin:0;font-size:13px;color:var(--a-soft);text-align:center}
+.shake{animation:shake .35s}
+:focus-visible{outline:3px solid var(--tomato);outline-offset:2px}
+
+.note{width:340px;max-width:100%;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.note-t{font-weight:800;margin:0 0 6px;font-size:14px;color:var(--soft)}
+.col.on .note-t{color:var(--green-t)}
+.note-txt{margin:0;font-size:15px}
+.note pre{background:#1C2620;color:#E6F2EA;border-radius:12px;padding:12px 14px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:12px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.where{font-size:13px;color:var(--soft);margin:10px 0 0}
+.where b{color:var(--ink)}
+.go{display:none;margin-top:12px;height:44px;width:100%;border-radius:12px;border:1px solid var(--line);background:none;color:var(--ink);font:inherit;font-weight:800;cursor:pointer}
+
+.skills{max-width:980px;margin:0 auto}
+.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.rows li{display:grid;grid-template-columns:1.1fr 1.4fr 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.rows b{font-size:16px}
+.rows span{color:var(--soft);font-size:15px}
+.rows em{font-style:normal;font-weight:700;font-size:14px;color:var(--green-t)}
+.motto{font-family:Fraunces,Georgia,serif;font-size:clamp(22px,3vw,28px);line-height:1.25;margin:32px 0 0;max-width:30ch;text-wrap:balance}
+.motto span{color:var(--tomato)}
+.small{font-size:13px;color:var(--soft);margin:20px 0 0;max-width:70ch}
+
+@keyframes pop{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:780px){
+  .switch{display:flex}
+  .stage{grid-template-columns:minmax(0,1fr);gap:0}
+  .stage[data-view=on] .col.off,.stage[data-view=off] .col.on{display:none}
+  .phone{height:620px}
+  .go{display:block}
+}
+@media (max-width:600px){
+  .rows li{grid-template-columns:minmax(0,1fr);gap:2px}
+}
+</style>
+</head>
+<body>
+
+<header class="band hero">
+  <div class="hero-in">
+    <h1>Bocal sans JS, Bocal avec JS</h1>
+    <p>Même HTML, même CSS. Une seule différence : le JavaScript. Touche les mêmes boutons sur les deux téléphones et regarde ce qui se passe.</p>
+  </div>
+</header>
+
+<main class="band">
+  <div class="switch" role="group" aria-label="Version affichée">
+    <button type="button" data-v="off" aria-pressed="true">Sans JS</button>
+    <button type="button" data-v="on" aria-pressed="false">Avec JS</button>
+  </div>
+
+  <div class="stage" id="stage" data-view="off">
+    <section class="col off" aria-label="Bocal sans JavaScript">
+      <span class="tag"><i></i>Sans JS</span>
+      <div class="phone" id="phone-off"></div>
+      <div class="note" id="note-off">
+        <p class="note-t">Ce qui s'est passé</p>
+        <p class="note-txt">Joli, bien rangé… et figé. Essaie les filtres, la lune, l'avatar, la recherche, le bouton « Je l'ai mangé ».</p>
+        <button class="go" type="button" data-v="on">Voir la version avec JS</button>
+      </div>
+    </section>
+
+    <section class="col on" aria-label="Bocal avec JavaScript">
+      <span class="tag"><i></i>Avec JS</span>
+      <div class="phone" id="phone-on"></div>
+      <div class="note" id="note-on">
+        <p class="note-t">Ce que le JS vient de faire</p>
+        <p class="note-txt">Touche n'importe quoi : ici, tu verras le code qui a travaillé, en quelques lignes.</p>
+        <pre hidden><code></code></pre>
+        <p class="where" hidden></p>
+        <button class="go" type="button" data-v="off">Voir la version sans JS</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<section class="band skills">
+  <h2>Ce que tu vas savoir faire, et où tu l'apprends</h2>
+  <ul class="rows">
+    <li><b>Filtrer une liste</b><span>Boutique, galerie, projets de Valmont</span><em>Ateliers 6 et 7</em></li>
+    <li><b>Chercher en tapant</b><span>Barre de recherche de n'importe quelle app</span><em>Ateliers 6 et 7</em></li>
+    <li><b>Mode sombre</b><span>Réglages de presque toutes les apps</span><em>Atelier 7</em></li>
+    <li><b>Se connecter</b><span>Espace client, admin de Valmont</span><em>Atelier 5</em></li>
+    <li><b>Ajouter un élément</b><span>Panier, liste de tâches, frigo</span><em>Ateliers 3, 5 et 7</em></li>
+    <li><b>Compter et mettre à jour</b><span>Panier, notifications, likes</span><em>Ateliers 2 et 7</em></li>
+  </ul>
+  <p class="motto">Le HTML dit ce qu'il y a. Le CSS dit à quoi ça ressemble. <span>Le JS dit ce qui se passe quand on touche.</span></p>
+  <p class="small">Démo pour le module Intégration &amp; Développement Web, ITECOM. Aliments et prénom inventés pour l'exemple. Le petit texte sous le téléphone « Sans JS » est le seul JS de ce côté : il sert juste à t'expliquer ce qui ne se passe pas.</p>
+</section>
+
+<template id="app-tpl">
+  <div class="app">
+    <header class="app-bar">
+      <div class="top">
+        <span class="logo">Bocal</span>
+        <div class="actions">
+          <button type="button" class="icon-btn dark-btn" aria-label="Mode sombre"><svg class="i" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+          <button type="button" class="avatar" aria-label="Se connecter">AX</button>
+        </div>
+      </div>
+      <p class="greet">Bonjour <span class="who">invité</span></p>
+      <p class="saved"><strong class="count">0</strong> aliment sauvé cette semaine</p>
+    </header>
+    <div class="body">
+      <input class="search" type="search" placeholder="Chercher un aliment" aria-label="Chercher un aliment">
+      <div class="filters">
+        <button type="button" class="filter on" data-f="all">Tout</button>
+        <button type="button" class="filter" data-f="urgent">Urgent</button>
+        <button type="button" class="filter" data-f="later">Plus tard</button>
+      </div>
+      <ul class="list"></ul>
+      <form class="add">
+        <p class="add-t">Ajouter au frigo</p>
+        <div class="row">
+          <input name="name" placeholder="Ex. Brocoli" aria-label="Nom de l'aliment" autocomplete="off">
+          <select name="days" aria-label="À manger dans">
+            <option value="1">1 jour</option><option value="2">2 jours</option><option value="3" selected>3 jours</option><option value="5">5 jours</option><option value="7">7 jours</option>
+          </select>
+        </div>
+        <button class="button" type="submit">Ajouter</button>
+      </form>
+    </div>
+    <nav class="tab-bar" aria-label="Onglets">
+      <span class="tab on"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</span>
+      <span class="tab"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M6 9h12M9 5v2M9 12v3"/></svg>Mon frigo</span>
+      <span class="tab"><svg class="i" viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h14v14H6a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h14"/></svg>Recettes</span>
+    </nav>
+    <div class="sheet" hidden>
+      <form class="login">
+        <p class="add-t">Connexion</p>
+        <label>Mot de passe<input type="password" name="pw" autocomplete="off"></label>
+        <p class="err" hidden>Mot de passe incorrect, réessaie.</p>
+        <button class="button" type="submit">Se connecter</button>
+        <button class="ghost close" type="button">Fermer</button>
+        <p class="clue">Indice : le nom de l'appli, en minuscules</p>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script>
+{
+  const START = [
+    { id: 1, name: 'Yaourt nature', days: 1 },
+    { id: 2, name: 'Épinards', days: 2 },
+    { id: 3, name: 'Tomates', days: 4 },
+    { id: 4, name: 'Comté', days: 9 },
+    { id: 5, name: 'Œufs', days: 6 }
+  ];
+  const tpl = document.getElementById('app-tpl');
+  const off = document.getElementById('phone-off');
+  const on = document.getElementById('phone-on');
+  off.append(tpl.content.cloneNode(true));
+  on.append(tpl.content.cloneNode(true));
+
+  const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const plural = (n, w) => n + ' ' + w + (n > 1 ? 's' : '');
+  const cardHTML = f => {
+    const u = f.days <= 2;
+    return `<li class="card${u ? ' urgent' : ''}${f.isNew ? ' new' : ''}"><div><p class="name">${esc(f.name)}</p><p class="when">À manger dans ${plural(f.days, 'jour')}</p></div><span class="badge">${u ? 'Urgent' : 'Plus tard'}</span><button type="button" class="eat" data-id="${f.id}">Je l'ai mangé</button></li>`;
+  };
+  const shake = el => { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); };
+
+  /* ---------- Côté SANS JS : on dessine une fois, puis plus rien ne bouge ---------- */
+  off.querySelector('.list').innerHTML = START.map(cardHTML).join('');
+  const offTxt = document.querySelector('#note-off .note-txt');
+  const tellOff = t => { offTxt.textContent = t + ' Essaie la même chose dans la version avec JS.'; };
+  off.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || b.type === 'submit') return;
+    if (b.matches('.filter')) tellOff(`Tu as appuyé sur « ${b.textContent} ». La liste ne bouge pas : le bouton existe dans le HTML, mais aucun code ne l'écoute.`);
+    else if (b.matches('.dark-btn')) tellOff('La lune ne fait rien. Le CSS pourrait avoir des couleurs de nuit, mais personne ne lui dit de les mettre.');
+    else if (b.matches('.avatar')) tellOff("Rien ne s'ouvre. Sans JS, pas de fenêtre de connexion, et personne pour vérifier un mot de passe.");
+    else if (b.matches('.eat')) tellOff("L'aliment reste là et le compteur reste à 0. Rien ne retire, rien ne compte.");
+  });
+  off.addEventListener('submit', e => {
+    e.preventDefault();
+    tellOff("Ton aliment n'apparaît pas. Sans JS, le formulaire recharge la page et ce que tu as tapé disparaît.");
+  });
+  off.querySelector('.search').addEventListener('input', e => {
+    tellOff(`Tu tapes « ${e.target.value} ». La liste reste entière : rien ne compare ton texte aux aliments.`);
+  });
+
+  /* ---------- Côté AVEC JS ---------- */
+  const S = { foods: START.map(f => ({ ...f })), filter: 'all', query: '', saved: 0, next: 6, logged: false };
+  const app = on.querySelector('.app');
+  const list = on.querySelector('.list');
+  const search = on.querySelector('.search');
+  const sheet = on.querySelector('.sheet');
+  const pw = on.querySelector('.login input');
+  const err = on.querySelector('.err');
+  const note = document.getElementById('note-on');
+  const nTxt = note.querySelector('.note-txt'), nPre = note.querySelector('pre'), nCode = note.querySelector('code'), nWhere = note.querySelector('.where');
+
+  const say = (txt, code, where) => {
+    nTxt.textContent = txt;
+    nCode.textContent = code;
+    nPre.hidden = false;
+    nWhere.hidden = false;
+    nWhere.innerHTML = 'Tu l\'apprends dans : <b>' + where + '</b>';
+  };
+  const visible = () => S.foods
+    .filter(f => S.filter === 'all' || (S.filter === 'urgent' ? f.days <= 2 : f.days > 2))
+    .filter(f => f.name.toLowerCase().includes(S.query));
+  const render = () => {
+    const v = visible();
+    list.innerHTML = v.length ? v.map(cardHTML).join('') : '<li class="empty">Rien à afficher ici.</li>';
+    S.foods.forEach(f => { f.isNew = false; });
+  };
+  const setFilter = f => {
+    S.filter = f;
+    on.querySelectorAll('.filter').forEach(x => x.classList.toggle('on', x.dataset.f === f));
+  };
+  render();
+
+  on.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || b.type === 'submit') return;
+
+    if (b.matches('.filter')) {
+      setFilter(b.dataset.f);
+      render();
+      const n = visible().length;
+      const test = { all: 'true', urgent: 'food.days <= 2', later: 'food.days > 2' }[S.filter];
+      say(`Tu as choisi « ${b.textContent} ». Le JS a gardé ${n} aliment${n > 1 ? 's' : ''} sur ${S.foods.length}, puis a redessiné la liste.`,
+        `button.addEventListener('click', () => {\n  const visible = foods.filter(food => ${test});\n  render(visible);\n});`,
+        'Atelier 6 · Le tapis roulant (filter) et Atelier 7 · La vitrine (le clic)');
+    }
+    else if (b.matches('.dark-btn')) {
+      app.classList.toggle('dark');
+      const d = app.classList.contains('dark');
+      say(d ? "Le JS a ajouté la classe .dark sur l'écran. Le CSS avait déjà les couleurs de nuit : il attendait juste ce signal."
+            : 'Le JS a retiré la classe .dark. Retour aux couleurs de jour.',
+        `moon.addEventListener('click', () => {\n  screen.classList.toggle('dark');\n});`,
+        'Atelier 7 · La vitrine (classList)');
+    }
+    else if (b.matches('.avatar')) {
+      if (S.logged) {
+        say('Tu es déjà connecté : le JS s\'en souvient dans une variable et ne rouvre pas la fenêtre.',
+          `if (logged === true) {\n  return; // on ne fait rien\n}`, 'Atelier 2 · Les boîtes et Atelier 5 · Le carrefour');
+        return;
+      }
+      sheet.hidden = false;
+      pw.focus();
+      say("L'avatar ouvre la fenêtre de connexion. Elle était déjà dans le HTML, cachée : le JS enlève juste hidden.",
+        `avatar.addEventListener('click', () => {\n  sheet.hidden = false;\n});`,
+        'Atelier 7 · La vitrine');
+    }
+    else if (b.matches('.close')) {
+      sheet.hidden = true;
+    }
+    else if (b.matches('.eat')) {
+      const id = Number(b.dataset.id);
+      const f = S.foods.find(x => x.id === id);
+      S.foods = S.foods.filter(x => x.id !== id);
+      S.saved = S.saved + 1;
+      on.querySelector('.count').textContent = S.saved;
+      on.querySelector('.saved').lastChild.textContent = S.saved > 1 ? ' aliments sauvés cette semaine' : ' aliment sauvé cette semaine';
+      render();
+      say(`« ${f.name} » sort du frigo et le compteur passe à ${S.saved}. On retire, on compte, on affiche.`,
+        `foods = foods.filter(food => food.id !== ${id});\nsaved = saved + 1;\ncounter.textContent = saved;`,
+        'Atelier 2 · Les boîtes, Atelier 6 (filter) et Atelier 7 (textContent)');
+    }
+  });
+
+  search.addEventListener('input', () => {
+    S.query = search.value.trim().toLowerCase();
+    render();
+    const n = visible().length;
+    say(`Tu tapes « ${search.value} » : à chaque lettre, le JS compare ton texte au nom de chaque aliment. ${n} résultat${n > 1 ? 's' : ''}.`,
+      `search.addEventListener('input', () => {\n  const text = search.value.toLowerCase();\n  render(foods.filter(food =>\n    food.name.toLowerCase().includes(text)\n  ));\n});`,
+      'Atelier 6 · Le tapis roulant et Atelier 7 · La vitrine');
+  });
+
+  on.querySelector('.add').addEventListener('submit', e => {
+    e.preventDefault();
+    const form = e.target;
+    const input = form.elements.name;
+    const name = input.value.trim();
+    if (name === '') {
+      shake(input);
+      input.focus();
+      say("Champ vide : le JS bloque l'ajout et secoue le champ. C'est une validation de formulaire.",
+        `if (name === '') {\n  input.classList.add('shake');\n  return;\n}`,
+        'Atelier 5 · Le carrefour (if)');
+      return;
+    }
+    const days = Number(form.elements.days.value);
+    S.foods.push({ id: S.next++, name, days, isNew: true });
+    input.value = '';
+    search.value = '';
+    S.query = '';
+    setFilter('all');
+    render();
+    say(`« ${name} » est ajouté. Le JS l'a rangé dans le tableau, a décidé seul qu'il était ${days <= 2 ? 'urgent' : 'pour plus tard'} (${plural(days, 'jour')}), puis a redessiné la liste.`,
+      `foods.push({ name: '${name.replace(/'/g, "\\'")}', days: ${days} });\n\nif (food.days <= 2) {\n  badge = 'Urgent';\n} else {\n  badge = 'Plus tard';\n}\n\nrender(foods);`,
+      'Atelier 3 · La réserve (push), Atelier 5 (if) et Atelier 7 (createElement)');
+  });
+
+  on.querySelector('.login').addEventListener('submit', e => {
+    e.preventDefault();
+    const code = `if (password.value === 'bocal') {\n  sheet.hidden = true;\n  who.textContent = 'Axel';\n} else {\n  error.hidden = false;\n}`;
+    if (pw.value === 'bocal') {
+      S.logged = true;
+      sheet.hidden = true;
+      err.hidden = true;
+      pw.value = '';
+      on.querySelector('.who').textContent = 'Axel';
+      on.querySelector('.avatar').classList.add('logged');
+      say('Bon mot de passe : le JS ferme la fenêtre, écrit ton prénom et entoure ton avatar.', code, 'Atelier 5 · Le carrefour (if / else)');
+    } else {
+      err.hidden = false;
+      shake(e.target);
+      say("Mauvais mot de passe : le JS affiche l'erreur. Sans ce if, n'importe qui entrerait.", code, 'Atelier 5 · Le carrefour (if / else)');
+    }
+  });
+
+  /* ---------- Sélecteur mobile ---------- */
+  const stage = document.getElementById('stage');
+  const switches = document.querySelectorAll('.switch button');
+  const show = (v, scroll) => {
+    stage.dataset.view = v;
+    switches.forEach(s => s.setAttribute('aria-pressed', String(s.dataset.v === v)));
+    if (scroll) document.querySelector('.switch').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  switches.forEach(s => s.addEventListener('click', () => show(s.dataset.v)));
+  document.querySelectorAll('.go').forEach(g => g.addEventListener('click', () => show(g.dataset.v, true)));
+}
+</script>
+</body>
+</html>
