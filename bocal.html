@@ -162,14 +162,14 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 </main>
 
 <section class="band skills">
-  <h2>Ce que tu vas savoir faire, et où tu l'apprends</h2>
+  <h2>Ce que tu vas savoir faire, et le client de Bip Agence qui te l'apprend</h2>
   <ul class="rows">
-    <li><b>Filtrer une liste</b><span>Boutique, galerie, projets de Valmont</span><em>Ateliers 6 et 7</em></li>
-    <li><b>Chercher en tapant</b><span>Barre de recherche de n'importe quelle app</span><em>Ateliers 6 et 7</em></li>
-    <li><b>Mode sombre</b><span>Réglages de presque toutes les apps</span><em>Atelier 7</em></li>
-    <li><b>Se connecter</b><span>Espace client, admin de Valmont</span><em>Atelier 5</em></li>
-    <li><b>Ajouter un élément</b><span>Panier, liste de tâches, frigo</span><em>Ateliers 3, 5 et 7</em></li>
-    <li><b>Compter et mettre à jour</b><span>Panier, notifications, likes</span><em>Ateliers 2 et 7</em></li>
+    <li><b>Filtrer une liste</b><span>Boutique, galerie, projets de Valmont</span><em>Lumen</em></li>
+    <li><b>Chercher en tapant</b><span>Barre de recherche de n'importe quelle app</span><em>La Gazette + Lumen</em></li>
+    <li><b>Mode sombre</b><span>Réglages de presque toutes les apps</span><em>Pixa</em></li>
+    <li><b>Se connecter</b><span>Espace client, admin de Valmont</span><em>Ciel + Escale</em></li>
+    <li><b>Ajouter un élément</b><span>Panier, liste de tâches, frigo</span><em>Panier Malin</em></li>
+    <li><b>Compter et mettre à jour</b><span>Panier, notifications, likes</span><em>Bobine + Pixa</em></li>
   </ul>
   <p class="motto">Le HTML dit ce qu'il y a. Le CSS dit à quoi ça ressemble. <span>Le JS dit ce qui se passe quand on touche.</span></p>
   <p class="small">Démo pour le module Intégration &amp; Développement Web, ITECOM. Aliments et prénom inventés pour l'exemple. Le petit texte sous le téléphone « Sans JS » est le seul JS de ce côté : il sert juste à t'expliquer ce qui ne se passe pas.</p>
@@ -284,7 +284,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
     nCode.textContent = code;
     nPre.hidden = false;
     nWhere.hidden = false;
-    nWhere.innerHTML = 'Tu l\'apprends dans : <b>' + where + '</b>';
+    nWhere.innerHTML = 'Dans Bip Agence : <b>' + where + '</b>';
   };
   const visible = () => S.foods
     .filter(f => S.filter === 'all' || (S.filter === 'urgent' ? f.days <= 2 : f.days > 2))
@@ -311,7 +311,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
       const test = { all: 'true', urgent: 'food.days <= 2', later: 'food.days > 2' }[S.filter];
       say(`Tu as choisi « ${b.textContent} ». Le JS a gardé ${n} aliment${n > 1 ? 's' : ''} sur ${S.foods.length}, puis a redessiné la liste.`,
         `button.addEventListener('click', () => {\n  const visible = foods.filter(food => ${test});\n  render(visible);\n});`,
-        'Atelier 6 · Le tapis roulant (filter) et Atelier 7 · La vitrine (le clic)');
+        'Lumen, mission « La galerie filtrée »');
     }
     else if (b.matches('.dark-btn')) {
       app.classList.toggle('dark');
@@ -319,19 +319,19 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
       say(d ? "Le JS a ajouté la classe .dark sur l'écran. Le CSS avait déjà les couleurs de nuit : il attendait juste ce signal."
             : 'Le JS a retiré la classe .dark. Retour aux couleurs de jour.',
         `moon.addEventListener('click', () => {\n  screen.classList.toggle('dark');\n});`,
-        'Atelier 7 · La vitrine (classList)');
+        'Pixa, mission « Le mode sombre »');
     }
     else if (b.matches('.avatar')) {
       if (S.logged) {
         say('Tu es déjà connecté : le JS s\'en souvient dans une variable et ne rouvre pas la fenêtre.',
-          `if (logged === true) {\n  return; // on ne fait rien\n}`, 'Atelier 2 · Les boîtes et Atelier 5 · Le carrefour');
+          `if (logged === true) {\n  return; // on ne fait rien\n}`, 'Ciel, mission « Le conseil du jour » (if / else)');
         return;
       }
       sheet.hidden = false;
       pw.focus();
       say("L'avatar ouvre la fenêtre de connexion. Elle était déjà dans le HTML, cachée : le JS enlève juste hidden.",
         `avatar.addEventListener('click', () => {\n  sheet.hidden = false;\n});`,
-        'Atelier 7 · La vitrine');
+        'Escale, mission « Changer d’écran » (hidden)');
     }
     else if (b.matches('.close')) {
       sheet.hidden = true;
@@ -346,7 +346,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
       render();
       say(`« ${f.name} » sort du frigo et le compteur passe à ${S.saved}. On retire, on compte, on affiche.`,
         `foods = foods.filter(food => food.id !== ${id});\nsaved = saved + 1;\ncounter.textContent = saved;`,
-        'Atelier 2 · Les boîtes, Atelier 6 (filter) et Atelier 7 (textContent)');
+        'Pixa, mission « Le bouton J’aime » (le compteur) et Lumen (filter)');
     }
   });
 
@@ -356,7 +356,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
     const n = visible().length;
     say(`Tu tapes « ${search.value} » : à chaque lettre, le JS compare ton texte au nom de chaque aliment. ${n} résultat${n > 1 ? 's' : ''}.`,
       `search.addEventListener('input', () => {\n  const text = search.value.toLowerCase();\n  render(foods.filter(food =>\n    food.name.toLowerCase().includes(text)\n  ));\n});`,
-      'Atelier 6 · Le tapis roulant et Atelier 7 · La vitrine');
+      'La Gazette, mission « Le compteur de caractères » (input) et Lumen (filter)');
   });
 
   on.querySelector('.add').addEventListener('submit', e => {
@@ -369,7 +369,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
       input.focus();
       say("Champ vide : le JS bloque l'ajout et secoue le champ. C'est une validation de formulaire.",
         `if (name === '') {\n  input.classList.add('shake');\n  return;\n}`,
-        'Atelier 5 · Le carrefour (if)');
+        'La Gazette, mission « Le formulaire complet » (validation)');
       return;
     }
     const days = Number(form.elements.days.value);
@@ -381,7 +381,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
     render();
     say(`« ${name} » est ajouté. Le JS l'a rangé dans le tableau, a décidé seul qu'il était ${days <= 2 ? 'urgent' : 'pour plus tard'} (${plural(days, 'jour')}), puis a redessiné la liste.`,
       `foods.push({ name: '${name.replace(/'/g, "\\'")}', days: ${days} });\n\nif (food.days <= 2) {\n  badge = 'Urgent';\n} else {\n  badge = 'Plus tard';\n}\n\nrender(foods);`,
-      'Atelier 3 · La réserve (push), Atelier 5 (if) et Atelier 7 (createElement)');
+      'Panier Malin, mission « L’appli de courses » (push, createElement)');
   });
 
   on.querySelector('.login').addEventListener('submit', e => {
@@ -394,11 +394,11 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
       pw.value = '';
       on.querySelector('.who').textContent = 'Axel';
       on.querySelector('.avatar').classList.add('logged');
-      say('Bon mot de passe : le JS ferme la fenêtre, écrit ton prénom et entoure ton avatar.', code, 'Atelier 5 · Le carrefour (if / else)');
+      say('Bon mot de passe : le JS ferme la fenêtre, écrit ton prénom et entoure ton avatar.', code, 'Ciel (if / else) et Escale (hidden)');
     } else {
       err.hidden = false;
       shake(e.target);
-      say("Mauvais mot de passe : le JS affiche l'erreur. Sans ce if, n'importe qui entrerait.", code, 'Atelier 5 · Le carrefour (if / else)');
+      say("Mauvais mot de passe : le JS affiche l'erreur. Sans ce if, n'importe qui entrerait.", code, 'Ciel (if / else) et La Gazette (message d’erreur)');
     }
   });
 
