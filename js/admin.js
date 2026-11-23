@@ -93,6 +93,10 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
       allow read: if estFormateur();
     }
+    match /eleves/{uid}/notes/{jeu} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if estFormateur();
+    }
     match /{chemin=**}/jeux/{jeu} {
       allow read: if estFormateur();
     }
@@ -109,7 +113,7 @@ function ecranAcces() {
     </ol>
     <textarea class="regles" id="regles" readonly rows="16">${esc(regles(me.uid))}</textarea>
     <div class="actions"><button class="btn" type="button" id="copier">Copier les règles</button><button class="btn btn-p" type="button" id="reessayer">C’est publié, réessayer</button></div>
-    <p class="note">Ton identifiant : <code>${esc(me.uid)}</code>. Les élèves gardent leur accès : chacun ne voit que sa progression. Toi seul peux tout lire, sans rien modifier.</p>
+    <p class="note">Ton identifiant : <code>${esc(me.uid)}</code>. Les élèves gardent leur accès : chacun ne voit que sa progression. Toi seul peux tout lire et leur laisser un mot sur une mission, sans toucher à leur code.</p>
   </section>`;
   $("#copier").addEventListener("click", async () => { try { await navigator.clipboard.writeText(regles(me.uid)); $("#copier").textContent = "Copié !"; } catch (e) { $("#regles").select(); } });
   $("#reessayer").addEventListener("click", charger);
@@ -257,8 +261,10 @@ function afficherDetail(uid) {
           const etat = p ? `<span class="ok">${etoiles(p.stars)}</span>` : (x.runs || x.opens) ? `<span class="tag ${g.bloque && g.encours && g.encours.id === m.id ? "rouge" : "jaune"}">en cours${x.goals ? " · " + x.goals[0] + "/" + x.goals[1] + " objectifs" : ""}</span>` : `<span class="vide">—</span>`;
           const code = codeDe(g.data, m.id);
           return `<tr class="${g.encours && g.encours.id === m.id && !p ? "actuelle" : ""}"><td>${m.num}. ${esc(m.titre)}</td><td>${etat}</td><td>${x.runs || 0}</td><td>${x.errors || 0}</td><td>${x.hints || 0}</td><td>${x.wrong || 0}</td><td>${x.solution ? `<span class="tag orange">oui</span>` : "non"}</td><td>${duree(x.time)}</td>
-            <td>${code || x.lastErr ? `<button class="btn btn-mini" type="button" data-voir="${esc(jeu + "|" + m.id)}">Voir</button>` : ""}</td></tr>
-            <tr class="code-ligne" id="code-${esc(jeu + "-" + m.id)}" hidden><td colspan="9">${x.lastErr ? `<p class="err">Dernière erreur : ${esc(x.lastErr)}</p>` : ""}${code ? `<pre class="code">${esc(code)}</pre>` : `<p class="vide">Pas de code enregistré pour cette mission.</p>`}</td></tr>`;
+            <td><button class="btn btn-mini" type="button" data-voir="${esc(jeu + "|" + m.id)}">Voir</button></td></tr>
+            <tr class="code-ligne" id="code-${esc(jeu + "-" + m.id)}" hidden><td colspan="9">${x.lastErr ? `<p class="err">Dernière erreur : ${esc(x.lastErr)}</p>` : ""}${code ? `<pre class="code">${esc(code)}</pre>` : `<p class="vide">Pas de code enregistré pour cette mission.</p>`}
+              ${MOTS_JEUX.includes(jeu) ? `<div class="mot" data-mot="${esc(jeu + "|" + m.id)}"><label>Mot du formateur <small>(l’élève le voit en haut de la mission, son code n’est pas modifié)</small><textarea rows="3" placeholder="Une remarque, un indice, une ligne de code à essayer…"></textarea></label>
+              <div class="mot-actions"><button class="btn btn-mini btn-p" type="button" data-envoyer>Envoyer</button><button class="btn btn-mini" type="button" data-effacer>Effacer le mot</button><span class="mot-etat"></span></div></div>` : ""}</td></tr>`;
         }).join("")}</tbody></table></details>`;
     }).join("");
     let projet = "";
@@ -279,7 +285,40 @@ function afficherDetail(uid) {
     ${pasCommences.length ? `<section class="carte"><h2>Pas encore commencé</h2><p class="vide">${pasCommences.map(j => esc(JEUX[j].titre)).join(" · ")} (ou joué sans compte).</p></section>` : ""}`;
   $("#retour").addEventListener("click", afficherListe);
   document.querySelectorAll("[data-voir]").forEach(b => b.addEventListener("click", () => { const [jeu, id] = b.dataset.voir.split("|"); const row = document.getElementById("code-" + jeu + "-" + id); row.hidden = !row.hidden; b.textContent = row.hidden ? "Voir" : "Cacher"; }));
+  chargerMots(e);
   window.scrollTo(0, 0);
+}
+
+/* ---------- mots du formateur ---------- */
+const MOTS_JEUX = ["mission-bip", "bip-agence"]; // les jeux qui affichent le mot à l'élève
+const motsRef = (uid, jeu) => db.collection("eleves").doc(uid).collection("notes").doc(jeu);
+async function chargerMots(e) {
+  for (const jeu of Object.keys(e.jeux).filter(j => MOTS_JEUX.includes(j))) {
+    let notes = {};
+    try { const s = await motsRef(e.uid, jeu).get(); notes = (s.exists && s.data().notes) || {}; } catch (err) { /* règles à mettre à jour : on le dira à l'envoi */ }
+    if (vue.detail !== e.uid) return;
+    document.querySelectorAll(`[data-mot^="${CSS.escape(jeu + "|")}"]`).forEach(box => {
+      const id = box.dataset.mot.split("|")[1]; const n = notes[id];
+      if (n && n.text) { box.querySelector("textarea").value = n.text; box.querySelector(".mot-etat").textContent = "Mot envoyé" + (n.at && n.at.toDate ? " le " + n.at.toDate().toLocaleDateString("fr-FR") + " à " + n.at.toDate().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : ""); const b = document.querySelector(`[data-voir="${CSS.escape(box.dataset.mot)}"]`); if (b && !b.textContent.includes("✎")) b.textContent += " ✎"; }
+    });
+  }
+  document.querySelectorAll("[data-mot]").forEach(box => {
+    const [jeu, id] = box.dataset.mot.split("|"); const etat = box.querySelector(".mot-etat"); const ta = box.querySelector("textarea");
+    const envoyer = async texte => {
+      etat.textContent = "Envoi…";
+      try {
+        const F = firebase.firestore.FieldValue;
+        await motsRef(e.uid, jeu).set({ notes: { [id]: texte ? { text: texte, at: F.serverTimestamp() } : F.delete() } }, { merge: true });
+        etat.textContent = texte ? "✓ Envoyé : l’élève le voit tout de suite." : "Mot effacé.";
+        if (!texte) ta.value = "";
+      } catch (err) {
+        if (/permission/.test(String(err.code || err.message))) { etat.innerHTML = "Firestore refuse : mets à jour les règles. <button class=\"lien\" type=\"button\">Voir les règles</button>"; etat.querySelector("button").addEventListener("click", ecranAcces); }
+        else etat.textContent = "Erreur : " + (err.code || err.message);
+      }
+    };
+    box.querySelector("[data-envoyer]").addEventListener("click", () => { const t = ta.value.trim(); if (!t) { etat.textContent = "Écris d’abord ton mot."; return; } envoyer(t); });
+    box.querySelector("[data-effacer]").addEventListener("click", () => envoyer(""));
+  });
 }
 
 /* ---------- démarrage ---------- */

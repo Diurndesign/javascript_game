@@ -22,11 +22,11 @@ const BipCloud = (() => {
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
   const clean = st => { const o = {}; for (const k in st) if (!LOCAL_ONLY.includes(k)) o[k] = st[k]; return o; };
-  function note(msg) {
+  function note(msg, ms) {
     let n = $("#cloud-note");
     if (!n) { n = document.createElement("div"); n.id = "cloud-note"; n.setAttribute("role", "status"); document.body.appendChild(n); }
     n.textContent = msg; n.classList.add("show");
-    clearTimeout(note.t); note.t = setTimeout(() => n.classList.remove("show"), 3200);
+    clearTimeout(note.t); note.t = setTimeout(() => n.classList.remove("show"), ms || 3200);
   }
   function french(err) {
     const code = String(err && err.code || ""), m = String(err && err.message || err || "");
@@ -105,6 +105,35 @@ const BipCloud = (() => {
   }
   function queue() { if (!user || !ready) return; setStatus("pending"); clearTimeout(timer); timer = setTimeout(push, 1200); }
 
+  /* ---------- mots du formateur (lecture seule pour l'élève) ---------- */
+  let notes = {}, notesOff = null;
+  const SEEN = () => "bip-notes-vues-" + cfg.game;
+  function seen() { try { return JSON.parse(localStorage.getItem(SEEN()) || "{}"); } catch (e) { return {}; } }
+  function noteTime(n) { return n && n.at && n.at.toMillis ? n.at.toMillis() : 0; }
+  function titre(id) { try { const i = LEVELS.findIndex(l => l.id === id); return i < 0 ? "" : "la mission " + (i + 1) + " « " + LEVELS[i].title + " »"; } catch (e) { return ""; } }
+  function paintNote() {
+    const el = document.getElementById("prof-note"); if (!el) return;
+    const n = notes[el.dataset.id];
+    if (!n || !n.text) { el.hidden = true; el.innerHTML = ""; return; }
+    el.hidden = false;
+    el.innerHTML = `<p class="prof-note-k">Mot du formateur</p><div class="prof-note-t">${esc(n.text)}</div>`;
+    const vu = seen(); vu[el.dataset.id] = noteTime(n) || Date.now();
+    try { localStorage.setItem(SEEN(), JSON.stringify(vu)); } catch (e) { /* rien */ }
+  }
+  function listenNotes() {
+    if (notesOff) { notesOff(); notesOff = null; }
+    notes = {}; paintNote();
+    if (!user || !db) return;
+    notesOff = db.collection("eleves").doc(user.uid).collection("notes").doc(cfg.game).onSnapshot(snap => {
+      notes = (snap.exists && snap.data().notes) || {};
+      const vu = seen();
+      const cur = document.getElementById("prof-note");
+      const nouveaux = Object.keys(notes).filter(id => notes[id] && notes[id].text && noteTime(notes[id]) > (vu[id] || 0) && !(cur && cur.dataset.id === id));
+      paintNote();
+      if (nouveaux.length) note(nouveaux.length === 1 ? "Ton formateur t’a laissé un mot sur " + (titre(nouveaux[0]) || "une mission") + ". Ouvre-la pour le lire." : "Ton formateur t’a laissé " + nouveaux.length + " mots sur tes missions. Ouvre-les pour les lire.", 9000);
+    }, () => { /* règles pas encore à jour : on ignore */ });
+  }
+
   /* ---------- connexion : on récupère la progression du compte ---------- */
   async function adopt(u, { silent } = {}) {
     user = u; setStatus("saving");
@@ -122,11 +151,12 @@ const BipCloud = (() => {
     cfg.persist();
     cfg.refresh();
     await push();
+    listenNotes();
     if (!silent) note(remote ? "Progression récupérée : bon retour !" : "Compte prêt : ta progression est sauvegardée en ligne.");
   }
   async function logout() {
     if (timer || status !== "saved") await push();
-    user = null; ready = false;
+    user = null; ready = false; listenNotes();
     await auth.signOut();
     const cur = cfg.getStore(); const next = cfg.empty();
     for (const k of ["teacher", "unlockAll"]) if (k in cur) next[k] = cur[k];
@@ -287,7 +317,7 @@ const BipCloud = (() => {
       if (cur.owner) { const next = cfg.empty(); for (const k of ["teacher", "unlockAll"]) if (k in cur) next[k] = cur[k]; cfg.setStore(next); cfg.persist(); } // déconnecté ailleurs
       cfg.refresh(); setStatus("off");
     }
-    auth.onAuthStateChanged(u => { if (!u && user) { user = null; ready = false; setStatus("off"); cfg.refresh(); } });
+    auth.onAuthStateChanged(u => { if (!u && user) { user = null; ready = false; listenNotes(); setStatus("off"); cfg.refresh(); } });
     document.addEventListener("visibilitychange", async () => {
       if (!user) return;
       if (document.visibilityState === "hidden") { if (timer) push(); return; }
@@ -302,6 +332,6 @@ const BipCloud = (() => {
     });
   }
 
-  return { init, queue, track, bannerHTML, isLogged: () => !!user };
+  return { init, queue, track, bannerHTML, paintNote, isLogged: () => !!user };
 })();
 window.BipCloud = BipCloud;

@@ -76,6 +76,12 @@
   .regles { width: 100%; font: 400 .82rem/1.45 var(--mono); background: var(--ink); color: #E6EAF4; border-radius: 12px; }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; }
   @media (max-width: 700px) { main { padding: 14px; } .entete-eleve { grid-template-columns: 1fr; } }
+  .mot { margin-top: 12px; display: grid; gap: 6px; }
+  .mot label { display: grid; gap: 4px; font-weight: 700; font-size: .9rem; }
+  .mot small { font-weight: 400; color: var(--ink-soft, #5A6385); }
+  .mot textarea { font: .9rem/1.5 var(--mono); border: 2px solid #B9C2D6; border-radius: 8px; padding: 8px 10px; width: 100%; resize: vertical; }
+  .mot-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .mot-etat { font-size: .85rem; color: var(--ink-soft, #5A6385); }
 </style>
 </head>
 <body>
@@ -84,8 +90,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script src="js/admin-missions.js"></script>
-<script src="js/admin-missions-web.js"></script>
-<script src="js/admin.js"></script>
+<script src="js/admin-missions.js?v=20261123d"></script>
+<script src="js/admin-missions-web.js?v=20261123d"></script>
+<script src="js/admin.js?v=20261123d"></script>
 </body>
 </html>

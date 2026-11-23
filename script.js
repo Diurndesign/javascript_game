@@ -929,8 +929,9 @@ function openLevel(id) {
       <section class="card help" id="help" hidden><p class="card-kicker">Indices</p><ol class="hint-list" id="hint-list"></ol><div id="solution-box" hidden><p class="mini-label">Solution</p><pre class="code-block">${highlight(L.solution)}</pre><button class="btn btn-small" type="button" id="copy-solution">Copier dans l’éditeur</button></div></section>`;
     bench = benchHTML(L, hasStage);
   }
-  $("#view-level").innerHTML = head + `<div class="level-grid"><div class="brief">${brief}</div><div class="workbench">${bench}</div></div>`;
+  $("#view-level").innerHTML = head + `<div class="level-grid"><div class="brief"><div id="prof-note" class="prof-note" data-id="${esc(L.id)}" hidden></div>${brief}</div><div class="workbench">${bench}</div></div>`;
   setView("level");
+  if (window.BipCloud && BipCloud.paintNote) BipCloud.paintNote();
   updateStats();
   if (L.quiz) return bindQuiz(L);
 
