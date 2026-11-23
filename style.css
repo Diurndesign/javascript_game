@@ -373,3 +373,5 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; justif
 .pied-jeu-in .serie a { color: var(--ink); font-weight: 700; }
 .pied-jeu-in .serie a[aria-current] { text-decoration: none; background: var(--bip); border-radius: 6px; padding: 0 6px; }
 .pied-jeu-in .serie .atelier { border-left: 2px solid var(--ink-soft); padding-left: 14px; }
+
+.teacher-input { font: 400 14px var(--mono); border: 2px solid #B9C2D6; border-radius: 8px; padding: 6px 10px; background: #fff; color: var(--ink); }

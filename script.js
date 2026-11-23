@@ -1277,12 +1277,14 @@ function showNotebook() {
     <section class="prof">
       <p class="card-kicker">Options</p>
       <label for="unlock-all"><input type="checkbox" id="unlock-all" ${store.unlockAll ? "checked" : ""}> Débloquer toutes les missions (pour le formateur, ou pour réviser)</label>
+      <label for="teacher-code" style="display:grid;gap:6px">Code formateur : tout valider<span style="display:flex;gap:8px;flex-wrap:wrap"><input id="teacher-code" class="teacher-input" type="password" autocomplete="off"><button class="btn btn-small" type="button" id="teacher-all">Tout valider</button></span></label><p id="teacher-msg" style="font-size:.9rem;color:var(--ink-soft)">Passe toutes les missions à 3 étoiles (réservé au formateur).</p>
       <div><button class="btn btn-small btn-ghost" type="button" id="reset-all">Effacer ma progression</button></div>
-      <p style="font-size:.9rem;color:var(--ink-soft)">La progression est enregistrée dans ce navigateur uniquement.</p>
+      <p style="font-size:.9rem;color:var(--ink-soft)">Connecte-toi pour retrouver ta progression sur n’importe quel ordinateur.</p>
     </section>`;
   setView("notebook");
   $("#nav-notebook").setAttribute("aria-current", "page");
   $("#unlock-all").addEventListener("change", e => { store.unlockAll = e.target.checked; save(); showNotebook(); });
+  $("#teacher-all").addEventListener("click", () => { if ($("#teacher-code").value.trim().toLowerCase() !== "itecom") { $("#teacher-msg").textContent = "Code incorrect."; return; } LEVELS.forEach(l => { store.progress[l.id] = { stars: 3 }; }); save(); updateStats(); showNotebook(); $("#teacher-msg").textContent = "✓ Toutes les missions sont validées."; });
   $("#reset-all").addEventListener("click", e => twoStep(e.currentTarget, "Sûr ? Clique encore", () => { store = { progress: {}, drafts: {}, unlockAll: false }; save(); updateStats(); showNotebook(); }));
   updateStats();
 }
